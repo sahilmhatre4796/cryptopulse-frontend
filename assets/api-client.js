@@ -5,7 +5,7 @@
 //
 // Import order on each page: app.js → api-client.js
 // api-client.js overrides CP.auth with real server calls.
-
+//
 const API_BASE = "https://cryptopulse-backend-ht7y.onrender.com";
 
 // ── Low-level fetch wrapper ──────────────────────────────────────────────────

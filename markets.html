@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markets — CryptoPulse</title>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/premium.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.markets-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+.filter-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.search-wrap { position: relative; }
+.search-wrap input { padding-left: 2.25rem; width: 280px; }
+.search-wrap .search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--fg-muted); pointer-events: none; }
+.sort-th { cursor: pointer; user-select: none; }
+.sort-th:hover { color: var(--primary); }
+.sort-th.asc::after { content: ' ↑'; color: var(--primary); }
+.sort-th.desc::after { content: ' ↓'; color: var(--primary); }
+.sparkline-cell { width: 80px; height: 36px; }
+.cat-btn { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.cat-btn.active { background: var(--primary-dim) !important; color: var(--primary) !important; border-color: var(--primary) !important; }
+.page-controls { display: flex; align-items: center; gap: 0.5rem; justify-content: center; margin-top: 1.5rem; }
+.page-num { width: 32px; height: 32px; display: grid; place-items: center; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.75rem; cursor: pointer; border: 1px solid var(--border); color: var(--fg-muted); transition: all 0.15s; }
+.page-num:hover, .page-num.active { background: var(--primary-dim); color: var(--primary); border-color: var(--primary); }
+.ath-diff { font-family: var(--font-mono); font-size: 0.72rem; }
+@media (max-width:900px) { .hide-sm { display:none !important; } .search-wrap input { width: 200px; } }
+@media (max-width:600px) { .hide-md { display:none !important; } }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <div class="markets-header">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:0.25rem">Crypto Markets</h2>
+          <div class="label" id="market-summary">Loading market data…</div>
+        </div>
+        <div class="flex gap-3 flex-wrap items-center">
+          <div class="search-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="input" id="search-input" placeholder="Search coins…" oninput="filterCoins()">
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadCoins()" title="Refresh">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <!-- Category filters -->
+      <div class="filter-bar mb-4">
+        <button class="btn btn-ghost btn-sm cat-btn active" data-filter="all" onclick="setFilter(this,'all')">All Coins</button>
+        <button class="btn btn-ghost btn-sm cat-btn" data-filter="gainers" onclick="setFilter(this,'gainers')">Top Gainers</button>
+        <button class="btn btn-ghost btn-sm cat-btn" data-filter="losers" onclick="setFilter(this,'losers')">Top Losers</button>
+        <button class="btn btn-ghost btn-sm cat-btn" data-filter="watchlist" onclick="setFilter(this,'watchlist')">★ Watchlist</button>
+      </div>
+
+      <!-- Table -->
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table class="data-table" id="coins-table">
+          <thead>
+            <tr>
+              <th style="width:40px">★</th>
+              <th class="sort-th" onclick="sortBy('market_cap_rank')">#</th>
+              <th class="sort-th" onclick="sortBy('name')">Coin</th>
+              <th class="sort-th desc" onclick="sortBy('current_price')" id="th-price">Price</th>
+              <th class="sort-th hide-sm" onclick="sortBy('price_change_percentage_1h_in_currency')">1h %</th>
+              <th class="sort-th" onclick="sortBy('price_change_percentage_24h')">24h %</th>
+              <th class="sort-th hide-sm" onclick="sortBy('price_change_percentage_7d_in_currency')">7d %</th>
+              <th class="sort-th hide-sm" onclick="sortBy('market_cap')">Market Cap</th>
+              <th class="sort-th hide-md" onclick="sortBy('total_volume')">Volume (24h)</th>
+              <th class="hide-md">7d Chart</th>
+            </tr>
+          </thead>
+          <tbody id="coins-tbody">
+            ${Array(20).fill().map((_, i) => `<tr><td></td><td><div class="skeleton" style="height:.7rem;width:20px"></div></td><td><div class="flex items-center gap-2"><div class="skeleton" style="width:24px;height:24px;border-radius:50%"></div><div><div class="skeleton" style="height:.8rem;width:80px;margin-bottom:3px"></div><div class="skeleton" style="height:.65rem;width:40px"></div></div></div></td><td><div class="skeleton" style="height:.8rem;width:80px"></div></td><td class="hide-sm"><div class="skeleton" style="height:.7rem;width:50px"></div></td><td><div class="skeleton" style="height:.7rem;width:50px"></div></td><td class="hide-sm"><div class="skeleton" style="height:.7rem;width:50px"></div></td><td class="hide-sm"><div class="skeleton" style="height:.7rem;width:80px"></div></td><td class="hide-md"><div class="skeleton" style="height:.7rem;width:80px"></div></td><td class="hide-md"></td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="page-controls" id="pagination"></div>
+
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>window.CP_API_BASE = "http://localhost:4000";</script>
+<script src="assets/api-client.js"></script>
+<script src="assets/premium.js"></script>
+<script>
+CP.auth.requireAuth();
+CP.nav.initSidebar('markets');
+CP.nav.initTopbar('Markets');
+CP.toast.init();
+
+let allCoins = [];
+let filtered = [];
+let currentFilter = 'all';
+let sortKey = 'market_cap_rank';
+let sortDir = 'asc';
+let currentPage = 1;
+const perPage = 20;
+const miniCharts = {};
+
+async function loadCoins() {
+  try {
+    const data = await CP.api.getTopCoins(100);
+    allCoins = data;
+    // Update market summary
+    const totalMCap = data.reduce((a, c) => a + (c.market_cap || 0), 0);
+    const gainers = data.filter(c => c.price_change_percentage_24h > 0).length;
+    document.getElementById('market-summary').textContent = `${data.length} coins · ${CP.fmt.compact(totalMCap)} total market cap · ${gainers} gainers`;
+    applyFilter();
+  } catch(e) {
+    console.error(e);
+    CP.toast.error('Failed to load market data');
+  }
+}
+
+function setFilter(btn, f) {
+  currentFilter = f;
+  currentPage = 1;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+function applyFilter() {
+  let data = [...allCoins];
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  if (q) data = data.filter(c => c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q));
+  if (currentFilter === 'gainers') data = data.filter(c => c.price_change_percentage_24h > 0).sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h);
+  else if (currentFilter === 'losers') data = data.filter(c => c.price_change_percentage_24h < 0).sort((a, b) => a.price_change_percentage_24h - b.price_change_percentage_24h);
+  else if (currentFilter === 'watchlist') data = data.filter(c => serverWatchlist.has(c.id));
+  else {
+    data.sort((a, b) => {
+      const av = a[sortKey] ?? 0, bv = b[sortKey] ?? 0;
+      return sortDir === 'asc' ? (av < bv ? -1 : av > bv ? 1 : 0) : (av > bv ? -1 : av < bv ? 1 : 0);
+    });
+  }
+  filtered = data;
+  renderTable();
+  renderPagination();
+  setTimeout(() => { Premium.initTilt('.card'); Premium.initMagnetic(); }, 100);
+}
+
+function filterCoins() { currentPage = 1; applyFilter(); }
+
+function sortBy(key) {
+  if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortKey = key; sortDir = key === 'name' || key === 'market_cap_rank' ? 'asc' : 'desc'; }
+  document.querySelectorAll('.sort-th').forEach(th => th.classList.remove('asc', 'desc'));
+  event.target.classList.add(sortDir);
+  applyFilter();
+}
+
+function renderTable() {
+  const start = (currentPage - 1) * perPage;
+  const page = filtered.slice(start, start + perPage);
+  const tbody = document.getElementById('coins-tbody');
+
+  tbody.innerHTML = page.map((c) => {
+    const up24 = c.price_change_percentage_24h >= 0;
+    const watching = serverWatchlist.has(c.id);
+    const sp = c.sparkline_in_7d?.price || [];
+    return `<tr class="fade-in">
+      <td>
+        <button onclick="toggleWatch('${c.id}', this)" class="btn btn-icon btn-ghost btn-sm" style="color:${watching ? 'gold' : 'var(--fg-muted)'};font-size:1rem;min-width:28px">★</button>
+      </td>
+      <td class="rank">${c.market_cap_rank}</td>
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="coin-icon" style="background:${CP.getCoinColor(c.id)}22;color:${CP.getCoinColor(c.id)};font-size:0.55rem;width:24px;height:24px">
+            ${c.symbol.toUpperCase().slice(0,3)}
+          </div>
+          <div>
+            <div class="coin-name" style="font-size:0.85rem">${CP.escapeHtml(c.name)}</div>
+            <div class="coin-symbol">${c.symbol.toUpperCase()}</div>
+          </div>
+        </div>
+      </td>
+      <td class="price">${CP.fmt.price(c.current_price)}</td>
+      <td class="hide-sm"><span class="badge ${c.price_change_percentage_1h_in_currency >= 0 ? 'badge-up' : 'badge-down'}">${CP.fmt.pct(c.price_change_percentage_1h_in_currency)}</span></td>
+      <td><span class="badge ${up24 ? 'badge-up' : 'badge-down'}">${CP.fmt.pct(c.price_change_percentage_24h)}</span></td>
+      <td class="hide-sm"><span class="badge ${c.price_change_percentage_7d_in_currency >= 0 ? 'badge-up' : 'badge-down'}">${CP.fmt.pct(c.price_change_percentage_7d_in_currency)}</span></td>
+      <td class="hide-sm" style="font-family:var(--font-mono);font-size:0.82rem">${CP.fmt.compact(c.market_cap)}</td>
+      <td class="hide-md" style="font-family:var(--font-mono);font-size:0.82rem">${CP.fmt.compact(c.total_volume)}</td>
+      <td class="hide-md"><div class="sparkline-cell"><canvas id="sp-${c.id}"></canvas></div></td>
+    </tr>`;
+  }).join('');
+
+  // Render sparklines after DOM update
+  setTimeout(() => {
+    page.forEach(c => {
+      const ctx = document.getElementById(`sp-${c.id}`);
+      const sp = c.sparkline_in_7d?.price;
+      if (ctx && sp?.length > 0) {
+        if (miniCharts[c.id]) miniCharts[c.id].destroy();
+        miniCharts[c.id] = CP.charts.miniChart(ctx, sp.slice(-24), c.price_change_percentage_7d_in_currency >= 0);
+      }
+    });
+  }, 50);
+}
+
+function renderPagination() {
+  const pages = Math.ceil(filtered.length / perPage);
+  const pag = document.getElementById('pagination');
+  if (pages <= 1) { pag.innerHTML = ''; return; }
+  let html = `<button class="btn btn-ghost btn-sm" onclick="changePage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
+  for (let i = 1; i <= pages; i++) {
+    html += `<div class="page-num ${i===currentPage?'active':''}" onclick="changePage(${i})">${i}</div>`;
+  }
+  html += `<button class="btn btn-ghost btn-sm" onclick="changePage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next →</button>`;
+  pag.innerHTML = html;
+}
+
+function changePage(p) {
+  const pages = Math.ceil(filtered.length / perPage);
+  if (p < 1 || p > pages) return;
+  currentPage = p;
+  renderTable();
+  renderPagination();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+let serverWatchlist = new Set();
+
+async function loadWatchlist() {
+  try {
+    const r = await CP.watchlistApi.getAll();
+    if (r?.ok) serverWatchlist = new Set((r.data.watchlist || []).map(w => w.coin_id));
+  } catch(e) { console.error('Watchlist load error:', e); }
+}
+
+async function toggleWatch(id, btn) {
+  try {
+    if (serverWatchlist.has(id)) {
+      await CP.watchlistApi.remove(id);
+      serverWatchlist.delete(id);
+      btn.style.color = 'var(--fg-muted)';
+      CP.toast.success('Removed from watchlist');
+    } else {
+      await CP.watchlistApi.add(id);
+      serverWatchlist.add(id);
+      btn.style.color = 'gold';
+      CP.toast.success('Added to watchlist');
+    }
+  } catch(e) { CP.toast.error('Failed to update watchlist'); }
+}
+
+loadWatchlist().then(() => loadCoins());
+setInterval(loadCoins, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — CryptoPulse</title>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/premium.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.page-content { padding: 2.25rem 2.5rem; max-width: 1320px; margin: 0 auto; }
+
+.hero-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; gap: 1.5rem; }
+.hero-greeting h1 { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.hero-sub { color: var(--fg-muted); font-size: 0.9rem; }
+.hero-coin-wrap { width: 110px; height: 110px; flex-shrink: 0; }
+.hero-coin-wrap canvas { width: 100%; height: 100%; display: block; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+
+.bento { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; margin-bottom: 1.75rem; }
+.chart-wrap { height: 300px; margin-top: 1.5rem; }
+.coin-list-card { max-height: 460px; overflow: auto; }
+.coin-row {
+  display: flex; align-items: center; gap: 0.875rem;
+  padding: 0.85rem 0; border-bottom: 1px solid rgba(31,31,31,0.6);
+  cursor: pointer; transition: background 0.12s, padding-left 0.12s; border-radius: var(--radius-sm);
+}
+.coin-row:last-child { border-bottom: none; }
+.coin-row:hover { background: rgba(31,31,31,0.35); padding-left: 0.5rem; }
+.coin-info { flex: 1; min-width: 0; }
+.coin-name-sm { font-size: 0.86rem; font-weight: 600; }
+.coin-sym { font-family: var(--font-mono); font-size: 0.68rem; color: var(--fg-muted); margin-top: 0.15rem; }
+.coin-price-sm { font-family: var(--font-mono); font-size: 0.86rem; font-weight: 600; text-align: right; }
+.mini-chart-wrap { width: 64px; height: 34px; }
+
+.bottom-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 1.25rem; }
+
+.fg-gauge { text-align: center; }
+.fg-number { font-family: var(--font-heading); font-size: 3.75rem; font-weight: 900; line-height: 1; }
+.fg-label { font-size: 0.9rem; font-weight: 600; margin-top: 0.4rem; }
+.fg-bar { height: 6px; border-radius: 3px; margin: 1.5rem 0 0.65rem; background: linear-gradient(to right, #FF2E2E, #FF8C00, #FFD700, #00FF94); position: relative; }
+.fg-needle { width: 2px; height: 10px; background: #fff; border-radius: 1px; position: absolute; top: -2px; transition: left 0.5s; }
+.fg-labels { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--fg-muted); letter-spacing: 0.06em; }
+
+.trend-item { display: flex; align-items: center; gap: 0.875rem; padding: 0.65rem 0; border-bottom: 1px solid rgba(31,31,31,0.5); }
+.trend-item:last-child { border-bottom: none; }
+.trend-rank { font-family: var(--font-mono); font-size: 0.74rem; color: var(--fg-muted); width: 18px; }
+.trend-info { flex: 1; }
+.trend-name { font-size: 0.86rem; font-weight: 600; }
+.trend-sym { font-family: var(--font-mono); font-size: 0.68rem; color: var(--fg-muted); margin-top: 0.1rem; }
+
+@media (max-width:1200px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .bento { grid-template-columns: 1fr; }
+  .coin-list-card { max-height: none; }
+  .bottom-row { grid-template-columns: 1fr 1fr; }
+  .bottom-row .card:first-child { grid-column: span 2; }
+}
+@media (max-width:768px) {
+  .page-content { padding: 1.5rem; }
+  .hero-row { flex-direction: column; align-items: flex-start; }
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .bottom-row { grid-template-columns: 1fr; }
+  .bottom-row .card:first-child { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+
+    <div class="ticker-bar" style="background:var(--bg-muted);border-bottom:1px solid var(--border);height:36px;overflow:hidden;display:flex;align-items:center;">
+      <div class="ticker-track" id="ticker-track">
+        <span class="ticker-item" style="color:var(--fg-muted);font-family:var(--font-mono);font-size:0.7rem;">Loading live prices…</span>
+      </div>
+    </div>
+
+    <div class="topbar" id="topbar"></div>
+
+    <div class="page-content">
+
+      <div class="hero-row">
+        <div class="hero-greeting">
+          <h1>Market overview</h1>
+          <div class="hero-sub">Live prices update automatically every minute</div>
+        </div>
+        <div class="hero-coin-wrap"><canvas id="hero-coin-canvas"></canvas></div>
+      </div>
+
+      <div class="stats-row" id="stats-row">
+        <div class="card stat-card"><div class="label mb-2">Market Cap</div><div class="stat-value skeleton" style="height:1.75rem;width:120px">&nbsp;</div></div>
+        <div class="card stat-card"><div class="label mb-2">24h Volume</div><div class="stat-value skeleton" style="height:1.75rem;width:120px">&nbsp;</div></div>
+        <div class="card stat-card"><div class="label mb-2">BTC Dominance</div><div class="stat-value skeleton" style="height:1.75rem;width:80px">&nbsp;</div></div>
+        <div class="card stat-card"><div class="label mb-2">Active Coins</div><div class="stat-value skeleton" style="height:1.75rem;width:80px">&nbsp;</div></div>
+      </div>
+
+      <div class="bento" id="main-bento">
+        <div class="card chart-card">
+          <div class="card-header">
+            <div>
+              <span class="card-title" id="chart-coin-label">BTC / USD</span>
+              <div style="margin-top:0.5rem;display:flex;align-items:baseline;gap:0.875rem">
+                <span class="mono" id="chart-price" style="font-size:1.75rem;font-weight:700;color:var(--fg-card)">—</span>
+                <span id="chart-change" class="stat-change">—</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-ghost btn-sm tab-btn active" data-days="1">1D</button>
+              <button class="btn btn-ghost btn-sm tab-btn" data-days="7">7D</button>
+              <button class="btn btn-ghost btn-sm tab-btn" data-days="30">1M</button>
+              <button class="btn btn-ghost btn-sm tab-btn" data-days="90">3M</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="price-chart"></canvas></div>
+        </div>
+
+        <div class="card coin-list-card">
+          <div class="card-header"><span class="card-title">Top coins</span></div>
+          <div id="coin-list"></div>
+        </div>
+      </div>
+
+      <div class="bottom-row">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Latest news</span>
+            <a href="news.html" class="btn btn-ghost btn-sm">View all →</a>
+          </div>
+          <div id="news-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Fear & greed</span></div>
+          <div class="fg-gauge" id="fg-gauge">
+            <div class="fg-number" id="fg-number" style="color:var(--secondary)">—</div>
+            <div class="fg-label" id="fg-label" style="color:var(--fg-muted)">Loading…</div>
+            <div class="fg-bar" id="fg-bar">
+              <div class="fg-needle" id="fg-needle" style="left:50%;margin-left:-1px"></div>
+            </div>
+            <div class="fg-labels"><span>Fear</span><span>Neutral</span><span>Greed</span></div>
+            <div style="margin-top:1.25rem;font-size:0.74rem;color:var(--fg-muted);font-family:var(--font-mono)">Updated daily</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">Trending</span></div>
+          <div id="trending-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="assets/app.js"></script>
+<script>window.CP_API_BASE = "http://localhost:4000";</script>
+<script src="assets/api-client.js"></script>
+<script src="assets/scene3d.js"></script>
+<script src="assets/premium.js"></script>
+<script>
+CP.auth.requireAuth();
+CP.nav.initSidebar('dashboard');
+CP.nav.initTopbar('Dashboard');
+CP.toast.init();
+
+let priceChartInstance = null;
+let selectedCoin = null;
+const coins = [];
+
+window.addEventListener('load', () => {
+  const c = document.getElementById('hero-coin-canvas');
+  if (c) CP3D.rotatingCoin(c, 'BTC', 0x00f0ff);
+});
+
+async function loadGlobal() {
+  try {
+    const d = await CP.api.getGlobal();
+    const g = d.data;
+    const statsRow = document.getElementById('stats-row');
+    statsRow.innerHTML = `
+      <div class="card stat-card">
+        <div class="label mb-2">Market Cap</div>
+        <div class="stat-value">${CP.fmt.compact(g.total_market_cap?.usd)}</div>
+        <div class="stat-change ${CP.fmt.pctClass(g.market_cap_change_percentage_24h_usd)}">${CP.fmt.pct(g.market_cap_change_percentage_24h_usd)}</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label mb-2">24h Volume</div>
+        <div class="stat-value">${CP.fmt.compact(g.total_volume?.usd)}</div>
+      </div>
+      <div class="card stat-card">
+        <div class="label mb-2">BTC Dominance</div>
+        <div class="stat-value">${g.market_cap_percentage?.btc?.toFixed(1)}%</div>
+        <div class="progress-bar" style="margin-top:0.6rem"><div class="progress-fill" style="width:${g.market_cap_percentage?.btc}%;background:var(--primary)"></div></div>
+      </div>
+      <div class="card stat-card">
+        <div class="label mb-2">Active Coins</div>
+        <div class="stat-value">${CP.fmt.num(g.active_cryptocurrencies, 0)}</div>
+        <div style="font-size:0.74rem;color:var(--fg-muted);margin-top:0.3rem;font-family:var(--font-mono)">${CP.fmt.num(g.markets, 0)} markets</div>
+      </div>`;
+  } catch(e) { console.error('Global stats error:', e); }
+}
+
+async function loadCoins() {
+  try {
+    const data = await CP.api.getTopCoins(15);
+    coins.splice(0, coins.length, ...data);
+
+    const track = document.getElementById('ticker-track');
+    const items = data.slice(0, 10).map(c => {
+      const chg = c.price_change_percentage_24h;
+      const color = chg >= 0 ? 'var(--secondary)' : 'var(--danger)';
+      return `<span class="ticker-item"><span class="ticker-name">${c.symbol.toUpperCase()}</span><span class="ticker-price">${CP.fmt.price(c.current_price)}</span><span style="color:${color};font-family:var(--font-mono);font-size:0.7rem">${CP.fmt.pct(chg)}</span></span>`;
+    }).join('');
+    track.innerHTML = items + items;
+
+    const list = document.getElementById('coin-list');
+    list.innerHTML = data.slice(0, 8).map((c, i) => {
+      const up = c.price_change_percentage_24h >= 0;
+      return `
+        <div class="coin-row" id="cr-${c.id}" onclick="selectCoin('${c.id}', ${i})">
+          <div class="coin-icon" style="background:${CP.getCoinColor(c.id)}22;color:${CP.getCoinColor(c.id)};width:32px;height:32px">
+            ${c.symbol.toUpperCase().slice(0,3)}
+          </div>
+          <div class="coin-info">
+            <div class="coin-name-sm">${CP.escapeHtml(c.name)}</div>
+            <div class="coin-sym">${c.symbol.toUpperCase()}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="coin-price-sm">${CP.fmt.price(c.current_price)}</div>
+            <div class="stat-change ${up ? 'pos' : 'neg'}" style="font-size:0.72rem;font-family:var(--font-mono);margin-top:0.15rem">${CP.fmt.pct(c.price_change_percentage_24h)}</div>
+          </div>
+          <div class="mini-chart-wrap"><canvas id="mini-${c.id}"></canvas></div>
+        </div>`;
+    }).join('');
+
+    data.slice(0, 8).forEach(c => {
+      const ctx = document.getElementById(`mini-${c.id}`);
+      if (ctx && c.sparkline_in_7d?.price?.length > 0) {
+        CP.charts.miniChart(ctx, c.sparkline_in_7d.price.slice(-24), c.price_change_percentage_24h >= 0);
+      }
+    });
+
+    selectCoin(data[0].id, 0);
+  } catch(e) { console.error('Coins error:', e); }
+}
+
+async function selectCoin(coinId, idx) {
+  selectedCoin = coinId;
+  document.querySelectorAll('.coin-row').forEach(r => r.classList.remove('selected'));
+  const row = document.getElementById(`cr-${coinId}`);
+  if (row) row.classList.add('selected');
+
+  const coin = coins.find(c => c.id === coinId);
+  if (coin) {
+    const up = coin.price_change_percentage_24h >= 0;
+    document.getElementById('chart-coin-label').textContent = coin.symbol.toUpperCase() + ' / USD';
+    document.getElementById('chart-price').textContent = CP.fmt.price(coin.current_price);
+    const chgEl = document.getElementById('chart-change');
+    chgEl.textContent = CP.fmt.pct(coin.price_change_percentage_24h) + ' (24h)';
+    chgEl.className = 'stat-change ' + (up ? 'pos' : 'neg');
+  }
+
+  await loadPriceChart(coinId, 1);
+}
+
+async function loadPriceChart(coinId, days) {
+  const canvas = document.getElementById('price-chart');
+  try {
+    const hist = await CP.api.getCoinHistory(coinId, days);
+    const prices = hist.prices;
+    const labels = prices.map(p => {
+      const d = new Date(p[0]);
+      return days <= 1 ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    });
+    const vals = prices.map(p => p[1]);
+    const up = vals[vals.length - 1] >= vals[0];
+
+    if (priceChartInstance) { priceChartInstance.destroy(); priceChartInstance = null; }
+    priceChartInstance = CP.charts.priceChart(canvas.getContext('2d'), labels, vals, up);
+
+    if (vals.length > 1) {
+      const change = ((vals[vals.length - 1] - vals[0]) / vals[0]) * 100;
+      const chgEl = document.getElementById('chart-change');
+      chgEl.textContent = CP.fmt.pct(change) + ` (${days === 1 ? '24h' : days + 'd'})`;
+      chgEl.className = 'stat-change ' + (change >= 0 ? 'pos' : 'neg');
+    }
+  } catch(e) { console.error('Chart error:', e); }
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = function() {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    if (selectedCoin) loadPriceChart(selectedCoin, parseInt(this.dataset.days));
+  };
+});
+
+async function loadFearGreed() {
+  try {
+    const d = await CP.api.getFearGreed();
+    const val = d?.data?.[0];
+    if (!val) return;
+    const n = parseInt(val.value);
+    const numEl = document.getElementById('fg-number');
+    const lblEl = document.getElementById('fg-label');
+    const needle = document.getElementById('fg-needle');
+    numEl.textContent = n;
+    lblEl.textContent = val.value_classification;
+    needle.style.left = `calc(${n}% - 1px)`;
+    const color = n < 25 ? 'var(--danger)' : n < 45 ? '#FF8C00' : n < 55 ? '#FFD700' : n < 75 ? 'var(--secondary)' : '#00B341';
+    numEl.style.color = color;
+    lblEl.style.color = color;
+  } catch(e) {}
+}
+
+async function loadNews() {
+  try {
+    const d = await CP.api.getNews();
+    const articles = d?.Data?.slice(0, 3) || [];
+    const list = document.getElementById('news-list');
+    if (!articles.length) { list.innerHTML = '<div class="muted" style="font-size:0.85rem;padding:1rem 0">No news available</div>'; return; }
+    list.innerHTML = articles.map(a => `
+      <div class="news-item fade-in">
+        <div class="news-source">${CP.escapeHtml(a.source_info?.name || a.source || '—')}</div>
+        <div class="news-title"><a href="${CP.escapeHtml(CP.safeUrl(a.url))}" target="_blank" rel="noopener noreferrer">${CP.escapeHtml(a.title)}</a></div>
+        <div class="news-meta">${CP.fmt.ago(a.published_on)} · ${CP.escapeHtml(a.categories?.split('|')[0] || 'General')}</div>
+      </div>`).join('');
+  } catch(e) { document.getElementById('news-list').innerHTML = '<div class="muted" style="font-size:0.85rem;padding:1rem 0">News unavailable</div>'; }
+}
+
+async function loadTrending() {
+  try {
+    const d = await CP.api.getTrending();
+    const items = d?.coins?.slice(0, 5) || [];
+    const list = document.getElementById('trending-list');
+    list.innerHTML = items.map((t, i) => `
+      <div class="trend-item">
+        <span class="trend-rank">${i + 1}</span>
+        <div class="trend-info">
+          <div class="trend-name">${CP.escapeHtml(t.item.name)}</div>
+          <div class="trend-sym">${t.item.symbol} · #${t.item.market_cap_rank || '?'}</div>
+        </div>
+        <div style="font-size:0.74rem;color:var(--fg-muted);font-family:var(--font-mono)">${CP.fmt.pct(t.item.data?.price_change_percentage_24h?.usd || 0)}</div>
+      </div>`).join('');
+  } catch(e) {}
+}
+
+(async function() {
+  loadGlobal();
+  await loadCoins();
+  loadFearGreed();
+  loadNews();
+  loadTrending();
+  setInterval(loadGlobal, 60000);
+  setInterval(loadCoins, 60000);
+  // Dynamically injected cards/rows need tilt + magnetic re-bound after render
+  setTimeout(() => { Premium.initTilt('.card'); Premium.initMagnetic(); }, 400);
+})();
+</script>
+</body>
+</html>

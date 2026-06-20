@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoPulse — The Crypto Terminal Built for What's Next</title>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/premium.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+body { background: var(--bg-void); overflow-x: hidden; }
+.noise-overlay { z-index: 9997; }
+
+/* ── Nav ── */
+.lp-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 2.5rem; transition: background 0.3s, border-color 0.3s, padding 0.3s;
+  border-bottom: 1px solid transparent;
+}
+.lp-nav.scrolled { background: rgba(3,3,3,0.75); backdrop-filter: blur(16px); border-color: var(--glass-border); padding: 0.9rem 2.5rem; }
+.lp-logo { display: flex; align-items: center; gap: 0.6rem; font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; }
+.lp-logo-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--grad-aurora); display: grid; place-items: center; color: #000; font-weight: 900; font-size: 0.7rem; box-shadow: 0 0 24px rgba(124,92,255,0.5); }
+.lp-nav-links { display: flex; gap: 2.25rem; font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.65); }
+.lp-nav-links a { transition: color 0.2s; }
+.lp-nav-links a:hover { color: #fff; }
+.lp-nav-cta { display: flex; gap: 0.75rem; align-items: center; }
+.btn-ghost-nav { font-family: var(--font-sans); font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.75); padding: 0.5rem 1rem; transition: color 0.2s; }
+.btn-ghost-nav:hover { color: #fff; }
+.btn-nav-primary {
+  font-family: var(--font-sans); font-size: 0.85rem; font-weight: 600; color: #000;
+  background: #fff; padding: 0.55rem 1.25rem; border-radius: 100px; transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-nav-primary:hover { box-shadow: 0 8px 24px -6px rgba(255,255,255,0.4); }
+@media (max-width: 900px) { .lp-nav-links { display: none; } .lp-nav { padding: 1rem 1.25rem; } }
+
+/* ── Hero ── */
+.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 8rem 2rem 4rem; text-align: center; }
+.hero-content { position: relative; z-index: 5; max-width: 880px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.45rem 1rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 100px;
+  font-family: var(--font-sans); font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-bottom: 2rem;
+}
+.hero-badge .pulse-dot { background: var(--accent-cyan); }
+.hero-badge .pulse-dot::after { background: var(--accent-cyan); }
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(2.6rem, 6.5vw, 5.2rem); font-weight: 700;
+  letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 1.75rem;
+}
+.hero h1 .word { display: inline-block; }
+.hero-sub {
+  font-family: var(--font-sans); font-size: 1.15rem; color: rgba(255,255,255,0.55); line-height: 1.65;
+  max-width: 560px; margin: 0 auto 2.5rem;
+}
+.hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 5rem; }
+.btn-hero-primary {
+  font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem; padding: 0.9rem 1.9rem;
+  border-radius: 100px; background: var(--grad-aurora); color: #000; display: inline-flex; align-items: center; gap: 0.5rem;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset, 0 12px 40px -10px rgba(124,92,255,0.6);
+}
+.btn-hero-outline {
+  font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem; padding: 0.9rem 1.9rem;
+  border-radius: 100px; background: var(--glass-bg); border: 1px solid var(--glass-border-strong); color: #fff;
+  display: inline-flex; align-items: center; gap: 0.5rem;
+}
+
+/* Floating mockup cards */
+.hero-mockup { position: relative; width: 100%; max-width: 920px; height: 340px; margin: 0 auto; z-index: 5; }
+.float-card {
+  position: absolute; padding: 1rem 1.25rem; min-width: 200px;
+}
+.float-card.fc1 { top: 0; left: 4%; }
+.float-card.fc2 { top: 12%; right: 2%; width: 240px; }
+.float-card.fc3 { bottom: 0; left: 30%; width: 260px; }
+.fc-label { font-family: var(--font-mono); font-size: 0.62rem; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+.fc-value { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: #fff; }
+.fc-change { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-green); margin-top: 0.2rem; }
+
+.scroll-cue { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 5; opacity: 0.5; animation: bounceCue 2s ease-in-out infinite; }
+@keyframes bounceCue { 0%,100% { transform: translate(-50%,0); } 50% { transform: translate(-50%,8px); } }
+
+/* ── Generic showcase layout ── */
+.showcase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; align-items: center; margin-top: 3rem; }
+.showcase-grid.reverse { direction: rtl; }
+.showcase-grid.reverse > * { direction: ltr; }
+@media (max-width: 900px) { .showcase-grid { grid-template-columns: 1fr; } }
+
+/* ── Product demo mockup ── */
+.demo-panel { padding: 1.75rem; }
+.demo-stat-row { display: flex; gap: 1rem; margin-bottom: 1.25rem; }
+.demo-stat { flex: 1; padding: 0.9rem; border-radius: var(--radius); background: rgba(255,255,255,0.03); }
+.demo-bars { display: flex; align-items: flex-end; gap: 6px; height: 90px; margin-top: 1rem; }
+.demo-bar { flex: 1; background: linear-gradient(180deg, var(--accent-cyan), rgba(0,240,255,0.1)); border-radius: 3px 3px 0 0; transition: height 1.2s var(--ease-out-expo); }
+
+/* ── AI assistant chat mockup ── */
+.chat-mockup { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.875rem; }
+.chat-bubble { max-width: 85%; padding: 0.7rem 1rem; border-radius: 14px; font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.5; }
+.chat-bubble.user { background: rgba(255,255,255,0.06); align-self: flex-end; border-radius: 14px 14px 4px 14px; }
+.chat-bubble.ai { background: linear-gradient(135deg, rgba(124,92,255,0.15), rgba(0,240,255,0.08)); border: 1px solid rgba(124,92,255,0.2); align-self: flex-start; border-radius: 14px 14px 14px 4px; }
+.typing-dots { display: inline-flex; gap: 3px; align-items: center; }
+.typing-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-cyan); animation: typingBounce 1.2s infinite; }
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typingBounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+/* ── Bots grid ── */
+.bots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 3rem; }
+.bot-card { padding: 1.5rem; }
+.bot-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+.bot-name { font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem; }
+.bot-status { display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent-green); text-transform: uppercase; letter-spacing: 0.06em; }
+.bot-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.bot-stat-label { font-size: 0.65rem; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+.bot-stat-val { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; }
+@media (max-width: 900px) { .bots-grid { grid-template-columns: 1fr; } }
+
+/* ── News intelligence mockup ── */
+.news-mockup-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.news-mockup-item { padding: 1rem 1.1rem; display: flex; align-items: center; gap: 1rem; }
+.sentiment-badge { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
+.sentiment-bull { background: rgba(0,255,148,0.12); color: var(--accent-green); }
+.sentiment-bear { background: rgba(255,46,46,0.12); color: #ff5e5e; }
+.sentiment-neutral { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6); }
+
+/* ── Testimonials ── */
+.testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 3rem; }
+.testi-card { padding: 1.75rem; }
+.testi-quote { font-family: var(--font-sans); font-size: 0.92rem; line-height: 1.65; color: rgba(255,255,255,0.8); margin-bottom: 1.25rem; }
+.testi-author { display: flex; align-items: center; gap: 0.75rem; }
+.testi-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--grad-aurora); display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; color: #000; }
+.testi-name { font-size: 0.85rem; font-weight: 600; }
+.testi-role { font-size: 0.72rem; color: var(--fg-muted); }
+@media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+
+/* ── Pricing ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 3rem; align-items: stretch; }
+.price-card { padding: 2rem; display: flex; flex-direction: column; }
+.price-card.featured { border-color: rgba(0,240,255,0.4) !important; transform: scale(1.03); }
+.price-tier { font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+.price-amount { font-family: var(--font-display); font-size: 2.6rem; font-weight: 700; margin-bottom: 1.5rem; }
+.price-amount span { font-size: 1rem; font-weight: 400; color: var(--fg-muted); }
+.price-features { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.75rem; flex: 1; }
+.price-feature { display: flex; align-items: center; gap: 0.65rem; font-size: 0.85rem; color: rgba(255,255,255,0.75); }
+.price-feature svg { flex-shrink: 0; color: var(--accent-cyan); }
+@media (max-width: 900px) { .pricing-grid { grid-template-columns: 1fr; } .price-card.featured { transform: none; } }
+
+/* ── FAQ ── */
+.faq-list { max-width: 720px; margin: 3rem auto 0; }
+.faq-item { border-bottom: 1px solid var(--glass-border); padding: 1.4rem 0; cursor: pointer; }
+.faq-q { display: flex; align-items: center; justify-content: space-between; font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem; }
+.faq-icon { transition: transform 0.3s var(--ease-out-expo); flex-shrink: 0; }
+.faq-item.open .faq-icon { transform: rotate(45deg); }
+.faq-a { font-family: var(--font-sans); font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.65; max-height: 0; overflow: hidden; transition: max-height 0.35s var(--ease-out-expo), opacity 0.3s; opacity: 0; }
+.faq-item.open .faq-a { max-height: 200px; opacity: 1; margin-top: 0.9rem; }
+
+/* ── Footer ── */
+.lp-footer { border-top: 1px solid var(--glass-border); padding: 4rem 0 2.5rem; }
+.footer-top { display: flex; justify-content: space-between; gap: 3rem; margin-bottom: 3rem; flex-wrap: wrap; }
+.footer-brand-sub { font-size: 0.85rem; color: var(--fg-muted); margin-top: 0.75rem; max-width: 260px; line-height: 1.6; }
+.footer-cols { display: flex; gap: 3.5rem; flex-wrap: wrap; }
+.footer-col-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-muted); margin-bottom: 1rem; }
+.footer-col a { display: block; font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 0.7rem; transition: color 0.2s; }
+.footer-col a:hover { color: #fff; }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 2rem; border-top: 1px solid var(--glass-border); font-size: 0.78rem; color: var(--fg-muted); flex-wrap: wrap; gap: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<nav class="lp-nav" id="lp-nav">
+  <div class="lp-logo"><div class="lp-logo-icon">CP</div>CRYPTO<span style="color:var(--accent-cyan)">PULSE</span></div>
+  <div class="lp-nav-links">
+    <a href="#product">Product</a>
+    <a href="#ai">AI Assistant</a>
+    <a href="#bots">Bots</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <div class="lp-nav-cta">
+    <a href="login.html" class="btn-ghost-nav">Sign in</a>
+    <a href="login.html" class="btn-nav-primary" data-magnetic>Get started</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="aurora-bg"><div class="aurora-blob b1"></div><div class="aurora-blob b2"></div><div class="aurora-blob b3"></div></div>
+  <div class="hero-content">
+    <div class="hero-badge" id="hero-badge"><span class="pulse-dot"></span> Now tracking 16,800+ assets in real time</div>
+    <h1 id="hero-title">
+      <span class="word">The</span> <span class="word">crypto</span> <span class="word">terminal</span><br>
+      <span class="word text-gradient">built</span> <span class="word text-gradient">for</span> <span class="word text-gradient">what's</span> <span class="word text-gradient">next.</span>
+    </h1>
+    <p class="hero-sub" id="hero-sub">Live markets, AI-powered insight, and automated strategy — unified in one cinematic command center built for traders who refuse to settle for spreadsheets.</p>
+    <div class="hero-cta" id="hero-cta">
+      <a href="login.html" class="btn-hero-primary" data-magnetic>
+        Get started free
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#product" class="btn-hero-outline" data-magnetic>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20"/></svg>
+        Watch demo
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-mockup" id="hero-mockup">
+    <div class="card float-card fc1 float-slow"><div class="fc-label">Portfolio value</div><div class="fc-value" id="mockup-portfolio">$0</div><div class="fc-change">+12.4% this month</div></div>
+    <div class="card float-card fc2 float-med">
+      <div class="fc-label">BTC / USD</div>
+      <svg width="100%" height="50" viewBox="0 0 200 50" preserveAspectRatio="none" style="margin-top:0.4rem">
+        <path d="M0,38 C20,34 35,40 50,30 C65,20 80,26 100,16 C120,6 140,14 160,8 C175,4 185,8 200,2" fill="none" stroke="#00f0ff" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="card float-card fc3 float-slow">
+      <div class="fc-label">Market sentiment</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.4rem">
+        <div style="font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--accent-green)">72</div>
+        <div style="font-size:0.78rem;color:var(--fg-muted)">Greed — bullish bias</div>
+      </div>
+    </div>
+  </div>
+
+  <a href="#product" class="scroll-cue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
+</section>
+
+<!-- ── PRODUCT DEMO ── -->
+<section class="section" id="product">
+  <div class="section-inner">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <div class="eyebrow" data-reveal>Product</div>
+      <h2 class="section-title" data-reveal>Your portfolio,<br>reimagined.</h2>
+      <p class="section-sub" style="margin:0 auto" data-reveal data-reveal-delay="1">Every position, every signal, every basis point — rendered live, with zero spreadsheet residue.</p>
+    </div>
+    <div class="card demo-panel grad-border" style="max-width:760px;margin:0 auto" data-reveal data-reveal-delay="2">
+      <div class="demo-stat-row">
+        <div class="demo-stat"><div class="fc-label">Total value</div><div class="fc-value" id="demo-total">$0</div></div>
+        <div class="demo-stat"><div class="fc-label">24h change</div><div class="fc-value" style="color:var(--accent-green)">+3.8%</div></div>
+        <div class="demo-stat"><div class="fc-label">Active bots</div><div class="fc-value">4</div></div>
+      </div>
+      <div class="demo-bars" id="demo-bars"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI ASSISTANT ── -->
+<section class="section" id="ai">
+  <div class="section-inner">
+    <div class="showcase-grid">
+      <div>
+        <div class="eyebrow" data-reveal>AI Assistant</div>
+        <h2 class="section-title" data-reveal>Ask anything<br>about the market.</h2>
+        <p class="section-sub" data-reveal data-reveal-delay="1">Plain-English questions in, institutional-grade answers out. Your portfolio context is always in the loop — no tab-switching required.</p>
+      </div>
+      <div class="card chat-mockup" data-reveal data-reveal-delay="2">
+        <div class="chat-bubble user">Why did SOL drop this morning?</div>
+        <div class="chat-bubble ai">Solana fell 4.2% after a large validator unstaking event triggered short-term liquidity pressure. Sentiment remains net-bullish — trending term across news sources is "network upgrade," not "sell-off."</div>
+        <div class="chat-bubble user">Should I add to my position?</div>
+        <div class="chat-bubble ai"><span class="typing-dots"><span></span><span></span><span></span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRADING BOTS ── -->
+<section class="section" id="bots">
+  <div class="section-inner">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <div class="eyebrow" data-reveal>Automation</div>
+      <h2 class="section-title" data-reveal>Bots that never sleep.</h2>
+      <p class="section-sub" style="margin:0 auto" data-reveal data-reveal-delay="1">Deploy a strategy in minutes. Walk away. Come back to results, not regrets.</p>
+    </div>
+    <div class="bots-grid">
+      <div class="card bot-card" data-reveal data-reveal-delay="1">
+        <div class="bot-card-header"><span class="bot-name">Momentum Hunter</span><span class="bot-status"><span class="pulse-dot"></span>Active</span></div>
+        <div class="bot-stat-grid">
+          <div><div class="bot-stat-label">Win rate</div><div class="bot-stat-val" style="color:var(--accent-green)">68%</div></div>
+          <div><div class="bot-stat-label">30d P&L</div><div class="bot-stat-val" style="color:var(--accent-green)">+$2,140</div></div>
+        </div>
+      </div>
+      <div class="card bot-card" data-reveal data-reveal-delay="2">
+        <div class="bot-card-header"><span class="bot-name">Smart DCA</span><span class="bot-status"><span class="pulse-dot"></span>Active</span></div>
+        <div class="bot-stat-grid">
+          <div><div class="bot-stat-label">Win rate</div><div class="bot-stat-val">81%</div></div>
+          <div><div class="bot-stat-label">30d P&L</div><div class="bot-stat-val" style="color:var(--accent-green)">+$890</div></div>
+        </div>
+      </div>
+      <div class="card bot-card" data-reveal data-reveal-delay="3">
+        <div class="bot-card-header"><span class="bot-name">Arb Scanner</span><span class="bot-status" style="color:var(--fg-muted)"><span class="pulse-dot" style="background:var(--fg-muted)"></span>Paused</span></div>
+        <div class="bot-stat-grid">
+          <div><div class="bot-stat-label">Win rate</div><div class="bot-stat-val">74%</div></div>
+          <div><div class="bot-stat-label">30d P&L</div><div class="bot-stat-val" style="color:var(--accent-green)">+$410</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NEWS INTELLIGENCE ── -->
+<section class="section" id="news">
+  <div class="section-inner">
+    <div class="showcase-grid reverse">
+      <div>
+        <div class="eyebrow" data-reveal>Intelligence</div>
+        <h2 class="section-title" data-reveal>News, decoded<br>in real time.</h2>
+        <p class="section-sub" data-reveal data-reveal-delay="1">Thousands of articles, filtered down to sentiment that actually moves your positions — bullish, bearish, or noise.</p>
+      </div>
+      <div class="news-mockup-list" data-reveal data-reveal-delay="2">
+        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bull">Bullish</span><div style="font-size:0.85rem;font-weight:600">Spot ETF inflows hit new monthly record</div></div>
+        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-neutral">Neutral</span><div style="font-size:0.85rem;font-weight:600">Exchange announces routine maintenance window</div></div>
+        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bear">Bearish</span><div style="font-size:0.85rem;font-weight:600">Regulator opens inquiry into stablecoin reserves</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="section">
+  <div class="section-inner">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <div class="eyebrow" data-reveal>Loved by traders</div>
+      <h2 class="section-title" data-reveal>Don't just take<br>our word for it.</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="card testi-card" data-reveal data-reveal-delay="1">
+        <div class="testi-quote">"I closed six other tabs the week I switched. Everything I need is finally in one place, and it actually looks good doing it."</div>
+        <div class="testi-author"><div class="testi-avatar">A</div><div><div class="testi-name">Alex R.</div><div class="testi-role">Independent trader</div></div></div>
+      </div>
+      <div class="card testi-card" data-reveal data-reveal-delay="2">
+        <div class="testi-quote">"The AI assistant catches things I'd have missed scrolling Twitter for an hour. It's like having a research desk on call."</div>
+        <div class="testi-author"><div class="testi-avatar">M</div><div><div class="testi-name">Maya T.</div><div class="testi-role">Portfolio manager</div></div></div>
+      </div>
+      <div class="card testi-card" data-reveal data-reveal-delay="3">
+        <div class="testi-quote">"Set up my DCA bot once. Haven't touched it in three months. It just works, quietly, in the background."</div>
+        <div class="testi-author"><div class="testi-avatar">J</div><div><div class="testi-name">Jordan K.</div><div class="testi-role">Long-term holder</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section class="section" id="pricing">
+  <div class="section-inner">
+    <div style="text-align:center;max-width:680px;margin:0 auto">
+      <div class="eyebrow" data-reveal>Pricing</div>
+      <h2 class="section-title" data-reveal>Simple, transparent pricing.</h2>
+      <p class="section-sub" style="margin:0 auto" data-reveal data-reveal-delay="1">Start free. Upgrade when the bots start paying for themselves.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="card price-card" data-reveal data-reveal-delay="1">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">$0<span>/mo</span></div>
+        <div class="price-features">
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Live market data</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Portfolio tracking</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>1 watchlist</div>
+        </div>
+        <a href="login.html" class="btn btn-outline w-full" data-magnetic>Get started</a>
+      </div>
+      <div class="card price-card featured grad-border shimmer-sweep" data-reveal data-reveal-delay="2">
+        <div class="price-tier" style="color:var(--accent-cyan)">Pro</div>
+        <div class="price-amount">$24<span>/mo</span></div>
+        <div class="price-features">
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Everything in Starter</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>AI market assistant</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>3 automated bots</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Real-time sentiment feed</div>
+        </div>
+        <a href="login.html" class="btn btn-primary w-full" data-magnetic>Get started</a>
+      </div>
+      <div class="card price-card" data-reveal data-reveal-delay="3">
+        <div class="price-tier">Elite</div>
+        <div class="price-amount">$79<span>/mo</span></div>
+        <div class="price-features">
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Everything in Pro</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Unlimited bots</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Priority data refresh</div>
+          <div class="price-feature"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Dedicated support</div>
+        </div>
+        <a href="login.html" class="btn btn-outline w-full" data-magnetic>Get started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div style="text-align:center">
+      <div class="eyebrow" data-reveal>FAQ</div>
+      <h2 class="section-title" data-reveal>Questions? Answered.</h2>
+    </div>
+    <div class="faq-list" id="faq-list">
+      <div class="faq-item" data-reveal>
+        <div class="faq-q">Is there really a free plan? <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="faq-a">Yes — Starter is free indefinitely, no card required. It covers live prices, portfolio tracking, and a single watchlist.</div>
+      </div>
+      <div class="faq-item" data-reveal>
+        <div class="faq-q">Do the bots execute real trades? <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="faq-a">Bots run against connected exchange accounts you authorize. You stay in full control of position sizing and can pause any bot instantly.</div>
+      </div>
+      <div class="faq-item" data-reveal>
+        <div class="faq-q">Can I cancel anytime? <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="faq-a">Yes, anytime, no questions asked. You'll keep access through the end of your current billing period.</div>
+      </div>
+      <div class="faq-item" data-reveal>
+        <div class="faq-q">Which exchanges do you support? <svg class="faq-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div class="faq-a">We're rolling out exchange connections progressively. Live market data and portfolio tracking work everywhere from day one.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="lp-footer">
+  <div class="section-inner">
+    <div class="footer-top">
+      <div>
+        <div class="lp-logo"><div class="lp-logo-icon">CP</div>CRYPTO<span style="color:var(--accent-cyan)">PULSE</span></div>
+        <div class="footer-brand-sub">The crypto terminal built for what's next. Live data, AI insight, automated strategy.</div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col"><div class="footer-col-title">Product</div><a href="#product">Dashboard</a><a href="#ai">AI Assistant</a><a href="#bots">Bots</a><a href="#pricing">Pricing</a></div>
+        <div class="footer-col"><div class="footer-col-title">Company</div><a href="#">About</a><a href="#">Careers</a><a href="#">Blog</a></div>
+        <div class="footer-col"><div class="footer-col-title">Legal</div><a href="#">Privacy</a><a href="#">Terms</a></div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 CryptoPulse. All rights reserved.</div>
+      <div style="display:flex;gap:1.25rem"><a href="#">Twitter</a><a href="#">GitHub</a><a href="#">Discord</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/premium.js"></script>
+<script>
+// Nav scroll state
+window.addEventListener('scroll', () => {
+  document.getElementById('lp-nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Hero GSAP entrance
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.gsap) {
+    gsap.set('#hero-title .word', { opacity: 0, y: 24 });
+    gsap.set('#hero-badge, #hero-sub, #hero-cta', { opacity: 0, y: 16 });
+    gsap.set('.float-card', { opacity: 0, y: 30, scale: 0.94 });
+
+    gsap.timeline()
+      .to('#hero-badge', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' })
+      .to('#hero-title .word', { opacity: 1, y: 0, duration: 0.7, stagger: 0.045, ease: 'power3.out' }, '-=0.3')
+      .to('#hero-sub', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.2')
+      .to('#hero-cta', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3')
+      .to('.float-card', { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.12, ease: 'back.out(1.4)' }, '-=0.2');
+  }
+
+  // Count-up triggers when scrolled into view
+  const mp = document.getElementById('mockup-portfolio');
+  const dt = document.getElementById('demo-total');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target === mp) Premium.countUp(mp, 28432, { prefix: '$', duration: 1400 });
+        if (entry.target === dt) Premium.countUp(dt, 28432, { prefix: '$', duration: 1400 });
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  if (mp) obs.observe(mp);
+  if (dt) obs.observe(dt);
+
+  // Demo bars animate in
+  const bars = document.getElementById('demo-bars');
+  if (bars) {
+    const heights = [40, 55, 35, 70, 50, 85, 60, 95, 75, 100, 80, 90];
+    bars.innerHTML = heights.map(h => `<div class="demo-bar" style="height:0" data-h="${h}"></div>`).join('');
+    const barObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('.demo-bar').forEach((b, i) => {
+            setTimeout(() => { b.style.height = b.dataset.h + '%'; }, i * 50);
+          });
+          barObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    barObs.observe(bars);
+  }
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — CryptoPulse</title>
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/premium.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.portfolio-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem; }
+.pf-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1rem; }
+.pf-main { display:grid; grid-template-columns:1fr 280px; gap:1rem; margin-bottom:1rem; }
+.holdings-table { width:100%; }
+.add-holding-form { display:grid; gap:0.75rem; }
+.donut-wrap { height:220px; position:relative; margin:1rem 0; }
+.donut-legend { display:flex; flex-direction:column; gap:0.4rem; }
+.legend-item { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; }
+.legend-dot { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+.modal-overlay { position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;width:420px;max-width:calc(100vw - 2rem); }
+.modal-title { font-family:var(--font-heading);font-size:0.85rem;font-weight:700;letter-spacing:0.05em;margin-bottom:1.5rem; }
+.empty-state { text-align:center;padding:3rem 1rem; }
+.empty-icon { font-size:3rem;margin-bottom:1rem;opacity:0.4; }
+@media(max-width:900px){ .pf-summary{grid-template-columns:repeat(2,1fr);} .pf-main{grid-template-columns:1fr;} }
+@media(max-width:600px){ .pf-summary{grid-template-columns:repeat(2,1fr);} }
+</style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="topbar" id="topbar"></div>
+    <div class="page-content">
+
+      <div class="portfolio-header">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:0.2rem">My Portfolio</h2>
+          <div class="label">Track your crypto holdings</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Add Holding</button>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="pf-summary">
+        <div class="card stat-card">
+          <div class="label mb-2">Total Value</div>
+          <div class="stat-value" id="pf-total">—</div>
+          <div class="stat-change" id="pf-total-change">—</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label mb-2">Total Cost</div>
+          <div class="stat-value" id="pf-cost">—</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label mb-2">P&L</div>
+          <div class="stat-value" id="pf-pnl">—</div>
+          <div class="stat-change" id="pf-pnl-pct">—</div>
+        </div>
+        <div class="card stat-card">
+          <div class="label mb-2">Assets</div>
+          <div class="stat-value" id="pf-assets">0</div>
+          <div style="font-size:0.7rem;color:var(--fg-muted);margin-top:0.25rem">holdings tracked</div>
+        </div>
+      </div>
+
+      <!-- Main grid: Table + Chart -->
+      <div class="pf-main">
+        <!-- Holdings table -->
+        <div class="card" style="padding:0;overflow-x:auto">
+          <div style="padding:1.25rem 1.25rem 0;display:flex;align-items:center;justify-content:space-between">
+            <span class="card-title">Holdings</span>
+            <span id="last-updated" style="font-size:0.65rem;color:var(--fg-muted);font-family:var(--font-mono)"></span>
+          </div>
+          <table class="data-table holdings-table" id="holdings-table">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Holdings</th>
+                <th>Buy Price</th>
+                <th>Current Price</th>
+                <th>Value</th>
+                <th>P&L</th>
+                <th>Change</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="holdings-tbody">
+              <tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📦</div><div style="color:var(--fg-muted);font-size:0.875rem">No holdings yet</div><div style="margin-top:0.75rem"><button class="btn btn-outline btn-sm" onclick="openModal()">Add your first holding</button></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Donut chart + legend -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">Allocation</span></div>
+          <div class="donut-wrap"><canvas id="donut-chart"></canvas></div>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Add Holding Modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">Add Holding</div>
+    <div class="add-holding-form">
+      <div class="input-group">
+        <label class="input-label">Search Coin</label>
+        <input type="text" class="input" id="coin-search" placeholder="Bitcoin, Ethereum…" oninput="searchCoin(this.value)">
+        <div id="coin-results" style="margin-top:0.25rem;background:var(--bg-muted);border:1px solid var(--border);border-radius:var(--radius);max-height:180px;overflow-y:auto;display:none"></div>
+      </div>
+      <div id="selected-coin-display" style="display:none;background:var(--primary-dim);border:1px solid rgba(0,240,255,0.3);border-radius:var(--radius);padding:0.75rem;display:flex;align-items:center;gap:0.75rem">
+        <div class="coin-icon" id="sel-icon" style="width:36px;height:36px">—</div>
+        <div><div id="sel-name" style="font-weight:700">—</div><div id="sel-price" style="font-size:0.75rem;color:var(--fg-muted);font-family:var(--font-mono)">—</div></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Amount Held</label>
+        <input type="number" class="input mono" id="hold-amount" placeholder="0.5" min="0" step="any">
+      </div>
+      <div class="input-group">
+        <label class="input-label">Buy Price (USD)</label>
+        <input type="number" class="input mono" id="hold-buy-price" placeholder="45000" min="0" step="any">
+      </div>
+      <div id="hold-preview" style="display:none;background:var(--bg-muted);border-radius:var(--radius);padding:0.75rem;font-family:var(--font-mono);font-size:0.75rem">
+        <div class="flex justify-between"><span style="color:var(--fg-muted)">Investment</span><span id="prev-cost">—</span></div>
+        <div class="flex justify-between mt-1"><span style="color:var(--fg-muted)">Current Value</span><span id="prev-value">—</span></div>
+        <div class="flex justify-between mt-1"><span style="color:var(--fg-muted)">P&L</span><span id="prev-pnl">—</span></div>
+      </div>
+      <div id="add-error" class="error-msg" style="display:none"></div>
+      <div class="flex gap-2" style="margin-top:0.5rem">
+        <button class="btn btn-ghost w-full" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary w-full" onclick="addHolding()">Add Holding</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>window.CP_API_BASE = "http://localhost:4000";</script>
+<script src="assets/api-client.js"></script>
+<script src="assets/premium.js"></script>
+<script>
+CP.auth.requireAuth();
+CP.nav.initSidebar('portfolio');
+CP.nav.initTopbar('Portfolio');
+CP.toast.init();
+
+let marketCoins = [];
+let selectedCoinForAdd = null;
+let donutChart = null;
+
+let serverHoldings = [];
+
+async function init() {
+  try {
+    [marketCoins] = await Promise.all([
+      CP.api.getTopCoins(50),
+      loadServerHoldings()
+    ]);
+    renderPortfolio();
+  } catch(e) { CP.toast.error('Failed to load data'); }
+}
+
+async function loadServerHoldings() {
+  try {
+    const r = await CP.portfolioApi.getAll();
+    if (r?.ok) serverHoldings = r.data.holdings || [];
+  } catch(e) { console.error('Portfolio load error:', e); }
+}
+
+function renderPortfolio() {
+  const holdings = serverHoldings;
+  const tbody = document.getElementById('holdings-tbody');
+  document.getElementById('pf-assets').textContent = holdings.length;
+
+  if (!holdings.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">📦</div><div style="color:var(--fg-muted);font-size:0.875rem">No holdings yet</div><div style="margin-top:0.75rem"><button class="btn btn-outline btn-sm" onclick="openModal()">Add your first holding</button></div></div></td></tr>';
+    updateSummary(0, 0, []);
+    renderDonut([]);
+    return;
+  }
+
+  let totalValue = 0, totalCost = 0;
+  const rows = holdings.map(h => {
+    const coin = marketCoins.find(c => c.id === h.coin_id);
+    const currentPrice = coin?.current_price || Number(h.buy_price);
+    const value = Number(h.amount) * currentPrice;
+    const cost = Number(h.amount) * Number(h.buy_price);
+    const pnl = value - cost;
+    const pnlPct = cost > 0 ? (pnl / cost) * 100 : 0;
+    totalValue += value; totalCost += cost;
+    return { ...h, currentPrice, value, cost, pnl, pnlPct, coinChange24h: coin?.price_change_percentage_24h || 0 };
+  });
+
+  tbody.innerHTML = rows.map(r => `
+    <tr class="fade-in">
+      <td>
+        <div class="flex items-center gap-2">
+          <div class="coin-icon" style="width:28px;height:28px;background:${CP.getCoinColor(r.coin_id)}22;color:${CP.getCoinColor(r.coin_id)};font-size:0.55rem">${CP.escapeHtml(r.symbol.toUpperCase().slice(0,3))}</div>
+          <div><div class="coin-name" style="font-size:0.85rem">${CP.escapeHtml(r.name)}</div><div class="coin-symbol">${CP.escapeHtml(r.symbol.toUpperCase())}</div></div>
+        </div>
+      </td>
+      <td class="mono" style="font-size:0.82rem">${r.amount} ${CP.escapeHtml(r.symbol.toUpperCase())}</td>
+      <td class="price">${CP.fmt.price(Number(r.buy_price))}</td>
+      <td class="price">${CP.fmt.price(r.currentPrice)}</td>
+      <td class="price" style="font-weight:700">${CP.fmt.price(r.value)}</td>
+      <td class="${r.pnl >= 0 ? 'pos' : 'neg'}" style="font-family:var(--font-mono);font-size:0.82rem;font-weight:600">${r.pnl >= 0 ? '+' : ''}${CP.fmt.price(r.pnl)}</td>
+      <td><span class="badge ${r.pnlPct >= 0 ? 'badge-up' : 'badge-down'}">${CP.fmt.pct(r.pnlPct)}</span></td>
+      <td><button class="btn btn-ghost btn-sm btn-icon" onclick="removeHolding('${r.id}')" title="Remove" style="color:var(--danger)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </button></td>
+    </tr>`).join('');
+
+  updateSummary(totalValue, totalCost, rows);
+  renderDonut(rows);
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  setTimeout(() => { Premium.initTilt('.card'); Premium.initMagnetic(); }, 100);
+}
+
+function updateSummary(totalValue, totalCost, rows) {
+  const pnl = totalValue - totalCost;
+  const pnlPct = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
+  document.getElementById('pf-total').textContent = CP.fmt.price(totalValue);
+  document.getElementById('pf-cost').textContent = CP.fmt.price(totalCost);
+  const pnlEl = document.getElementById('pf-pnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + CP.fmt.price(pnl);
+  pnlEl.style.color = pnl >= 0 ? 'var(--secondary)' : 'var(--danger)';
+  const pnlPctEl = document.getElementById('pf-pnl-pct');
+  pnlPctEl.textContent = CP.fmt.pct(pnlPct);
+  pnlPctEl.className = 'stat-change ' + (pnlPct >= 0 ? 'pos' : 'neg');
+  const tcEl = document.getElementById('pf-total-change');
+  const change24hVal = (rows || []).reduce((s, r) => {
+    const coin = marketCoins.find(c => c.id === r.coin_id);
+    return s + (Number(r.amount) * (coin?.current_price || 0) * (coin?.price_change_percentage_24h || 0) / 100);
+  }, 0);
+  tcEl.textContent = (change24hVal >= 0 ? '+' : '') + CP.fmt.price(change24hVal) + ' (24h)';
+  tcEl.className = 'stat-change ' + (change24hVal >= 0 ? 'pos' : 'neg');
+}
+
+function renderDonut(rows) {
+  const ctx = document.getElementById('donut-chart');
+  if (donutChart) { donutChart.destroy(); donutChart = null; }
+  const legend = document.getElementById('donut-legend');
+  if (!rows.length) { legend.innerHTML = '<div class="muted" style="font-size:0.8rem;text-align:center;padding:1rem">Add holdings to see allocation</div>'; return; }
+  const colors = rows.map(r => CP.getCoinColor(r.coinId));
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels: rows.map(r => r.symbol.toUpperCase()), datasets: [{ data: rows.map(r => r.value), backgroundColor: colors, borderColor: 'var(--bg-card)', borderWidth: 3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.label}: ${CP.fmt.price(c.raw)} (${((c.raw / c.dataset.data.reduce((a, v) => a + v, 0)) * 100).toFixed(1)}%)` } } }
+    }
+  });
+  const total = rows.reduce((s, r) => s + r.value, 0);
+  legend.innerHTML = rows.sort((a, b) => b.value - a.value).map(r => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${CP.getCoinColor(r.coinId)}"></div>
+      <span style="flex:1">${CP.escapeHtml(r.name)}</span>
+      <span class="mono" style="font-size:0.72rem;color:var(--fg-muted)">${((r.value / total) * 100).toFixed(1)}%</span>
+    </div>`).join('');
+}
+
+function openModal() { document.getElementById('add-modal').classList.add('open'); document.getElementById('coin-search').focus(); }
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  document.getElementById('coin-search').value = '';
+  document.getElementById('coin-results').style.display = 'none';
+  document.getElementById('selected-coin-display').style.display = 'none';
+  document.getElementById('hold-amount').value = '';
+  document.getElementById('hold-buy-price').value = '';
+  document.getElementById('hold-preview').style.display = 'none';
+  document.getElementById('add-error').style.display = 'none';
+  selectedCoinForAdd = null;
+}
+
+function searchCoin(q) {
+  const results = document.getElementById('coin-results');
+  if (!q || q.length < 2) { results.style.display = 'none'; return; }
+  const matches = marketCoins.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.symbol.toLowerCase().includes(q.toLowerCase())).slice(0, 8);
+  if (!matches.length) { results.style.display = 'none'; return; }
+  results.style.display = 'block';
+  results.innerHTML = matches.map(c => `
+    <div onclick="selectCoin('${c.id}')" style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem;cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='var(--bg-card)'" onmouseout="this.style.background=''">
+      <div class="coin-icon" style="width:24px;height:24px;font-size:0.5rem;background:${CP.getCoinColor(c.id)}22;color:${CP.getCoinColor(c.id)}">${c.symbol.toUpperCase().slice(0,3)}</div>
+      <div style="flex:1"><div style="font-size:0.82rem;font-weight:600">${CP.escapeHtml(c.name)}</div><div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--fg-muted)">${CP.escapeHtml(c.symbol.toUpperCase())}</div></div>
+      <div style="font-family:var(--font-mono);font-size:0.78rem">${CP.fmt.price(c.current_price)}</div>
+    </div>`).join('');
+}
+
+function selectCoin(id) {
+  const coin = marketCoins.find(c => c.id === id);
+  if (!coin) return;
+  selectedCoinForAdd = coin;
+  document.getElementById('coin-search').value = coin.name;
+  document.getElementById('coin-results').style.display = 'none';
+  const disp = document.getElementById('selected-coin-display');
+  disp.style.display = 'flex';
+  document.getElementById('sel-icon').textContent = coin.symbol.toUpperCase().slice(0, 3);
+  document.getElementById('sel-icon').style.cssText = `width:36px;height:36px;background:${CP.getCoinColor(id)}22;color:${CP.getCoinColor(id)}`;
+  document.getElementById('sel-name').textContent = coin.name;
+  document.getElementById('sel-price').textContent = 'Current: ' + CP.fmt.price(coin.current_price);
+  document.getElementById('hold-buy-price').value = coin.current_price.toFixed(coin.current_price >= 1 ? 2 : 8);
+  updatePreview();
+}
+
+document.getElementById('hold-amount').addEventListener('input', updatePreview);
+document.getElementById('hold-buy-price').addEventListener('input', updatePreview);
+
+function updatePreview() {
+  if (!selectedCoinForAdd) return;
+  const amount = parseFloat(document.getElementById('hold-amount').value);
+  const buyPrice = parseFloat(document.getElementById('hold-buy-price').value);
+  if (!Number.isFinite(amount) || !Number.isFinite(buyPrice) || amount <= 0 || buyPrice <= 0) { document.getElementById('hold-preview').style.display = 'none'; return; }
+  const cost = amount * buyPrice;
+  const value = amount * (selectedCoinForAdd.current_price || buyPrice);
+  const pnl = value - cost;
+  const pnlPct = (pnl / cost) * 100;
+  const prev = document.getElementById('hold-preview');
+  prev.style.display = 'block';
+  document.getElementById('prev-cost').textContent = CP.fmt.price(cost);
+  document.getElementById('prev-value').textContent = CP.fmt.price(value);
+  const pnlEl = document.getElementById('prev-pnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + CP.fmt.price(pnl) + ' (' + CP.fmt.pct(pnlPct) + ')';
+  pnlEl.style.color = pnl >= 0 ? 'var(--secondary)' : 'var(--danger)';
+}
+
+async function addHolding() {
+  const errEl = document.getElementById('add-error');
+  errEl.style.display = 'none';
+  if (!selectedCoinForAdd) { errEl.textContent = 'Please select a coin'; errEl.style.display = 'block'; return; }
+  const amount = parseFloat(document.getElementById('hold-amount').value);
+  const buyPrice = parseFloat(document.getElementById('hold-buy-price').value);
+  if (!Number.isFinite(amount) || amount <= 0) { errEl.textContent = 'Please enter a valid amount'; errEl.style.display = 'block'; return; }
+  if (!Number.isFinite(buyPrice) || buyPrice <= 0) { errEl.textContent = 'Please enter a valid buy price'; errEl.style.display = 'block'; return; }
+  try {
+    const r = await CP.portfolioApi.add({
+      coin_id: selectedCoinForAdd.id,
+      symbol: selectedCoinForAdd.symbol,
+      name: selectedCoinForAdd.name,
+      amount,
+      buy_price: buyPrice,
+    });
+    if (!r.ok) throw new Error(r.data?.error || 'Failed to add holding');
+    serverHoldings.push(r.data.holding);
+    closeModal();
+    renderPortfolio();
+    CP.toast.success(`Added ${amount} ${selectedCoinForAdd.symbol.toUpperCase()} to portfolio`);
+  } catch(e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+}
+
+async function removeHolding(id) {
+  if (!confirm('Remove this holding?')) return;
+  try {
+    const r = await CP.portfolioApi.remove(id);
+    if (!r.ok) throw new Error(r.data?.error || 'Failed to remove');
+    serverHoldings = serverHoldings.filter(h => h.id !== id);
+    renderPortfolio();
+    CP.toast.success('Holding removed');
+  } catch(e) { CP.toast.error(e.message); }
+}
+
+// Close modal on outside click
+document.getElementById('add-modal').onclick = function(e) { if (e.target === this) closeModal(); };
+
+init();
+setInterval(init, 60000);
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Unbounded:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Premium palette — deeper blacks, richer accent gradient */
+  --bg-void: #030303;
+  --bg-deep: #060607;
+  --glass-bg: rgba(255,255,255,0.035);
+  --glass-bg-strong: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.09);
+  --glass-border-strong: rgba(255,255,255,0.16);
+
+  --accent-cyan: #00f0ff;
+  --accent-violet: #7c5cff;
+  --accent-pink: #ff5fb8;
+  --accent-green: #00ff94;
+
+  --grad-aurora: linear-gradient(135deg, var(--accent-violet) 0%, var(--accent-cyan) 50%, var(--accent-pink) 100%);
+  --grad-text: linear-gradient(135deg, #ffffff 0%, #b8c1ff 50%, #00f0ff 100%);
+
+  --font-display: 'Unbounded', sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Custom cursor (fine-pointer devices only) ────────────────────────── */
+@media (pointer: fine) {
+  body.premium-cursor-active, body.premium-cursor-active * { cursor: none !important; }
+  body.premium-cursor-active input, body.premium-cursor-active textarea, body.premium-cursor-active select {
+    cursor: text !important;
+  }
+}
+.pcur-dot {
+  position: fixed; top: 0; left: 0; width: 6px; height: 6px; border-radius: 50%;
+  background: #fff; pointer-events: none; z-index: 10000; mix-blend-mode: difference;
+  transform: translate(-50%,-50%); will-change: transform;
+}
+.pcur-ring {
+  position: fixed; top: 0; left: 0; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.5); pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%); transition: width 0.25s var(--ease-out-expo), height 0.25s var(--ease-out-expo), border-color 0.25s, background 0.25s;
+  will-change: transform;
+}
+.pcur-ring.hover { width: 56px; height: 56px; border-color: var(--accent-cyan); background: rgba(0,240,255,0.08); }
+.pcur-ring.text-hover { width: 4px; height: 32px; border-radius: 2px; background: var(--accent-cyan); border: none; }
+.pcur-glow {
+  position: fixed; top: 0; left: 0; width: 420px; height: 420px; border-radius: 50%;
+  pointer-events: none; z-index: 1;
+  background: radial-gradient(circle, rgba(124,92,255,0.10) 0%, rgba(0,240,255,0.05) 40%, transparent 70%);
+  transform: translate(-50%,-50%); will-change: transform;
+}
+
+/* ── Aurora mesh background ───────────────────────────────────────────── */
+.aurora-bg {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
+}
+.aurora-blob {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.55;
+  will-change: transform;
+}
+.aurora-blob.b1 { width: 50vw; height: 50vw; background: radial-gradient(circle, var(--accent-violet), transparent 70%); top: -15%; left: -10%; animation: auroraDrift1 22s ease-in-out infinite; }
+.aurora-blob.b2 { width: 45vw; height: 45vw; background: radial-gradient(circle, var(--accent-cyan), transparent 70%); top: 10%; right: -15%; animation: auroraDrift2 26s ease-in-out infinite; }
+.aurora-blob.b3 { width: 38vw; height: 38vw; background: radial-gradient(circle, var(--accent-pink), transparent 70%); bottom: -10%; left: 25%; animation: auroraDrift3 30s ease-in-out infinite; }
+@keyframes auroraDrift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6%,8%) scale(1.15); } }
+@keyframes auroraDrift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8%,5%) scale(1.1); } }
+@keyframes auroraDrift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(4%,-6%) scale(1.2); } }
+
+/* ── Noise texture overlay ─────────────────────────────────────────────── */
+.noise-overlay {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.035; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Glassmorphism card (overrides base .card globally) ──────────────── */
+.card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 50px -20px rgba(0,0,0,0.6);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s var(--ease-out-expo);
+}
+.card:hover { border-color: var(--glass-border-strong) !important; }
+
+/* ── Tilt wrapper (JS sets transform via inline style) ───────────────── */
+[data-tilt] { transform-style: preserve-3d; will-change: transform; }
+
+/* ── Gradient border utility ──────────────────────────────────────────── */
+.grad-border { position: relative; border-radius: var(--radius-lg); }
+.grad-border::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--grad-aurora);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0.5; pointer-events: none;
+}
+
+/* ── Shimmer sweep (for premium accents, e.g. featured pricing) ─────────── */
+.shimmer-sweep { position: relative; overflow: hidden; }
+.shimmer-sweep::after {
+  content: ''; position: absolute; top: 0; left: -150%; width: 60%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.10), transparent);
+  animation: shimmerSweep 3.2s ease-in-out infinite;
+}
+@keyframes shimmerSweep { 0% { left: -150%; } 100% { left: 150%; } }
+
+/* ── Magnetic targets (JS applies transform) ─────────────────────────── */
+[data-magnetic] { transition: transform 0.2s var(--ease-out-expo); will-change: transform; }
+
+/* ── Gradient text ────────────────────────────────────────────────────── */
+.text-gradient {
+  background: var(--grad-text); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.text-gradient-accent {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ── Reveal-on-scroll (JS toggles .in via IntersectionObserver) ─────────── */
+[data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo); }
+[data-reveal].in { opacity: 1; transform: translateY(0); }
+[data-reveal-delay="1"] { transition-delay: 0.08s; }
+[data-reveal-delay="2"] { transition-delay: 0.16s; }
+[data-reveal-delay="3"] { transition-delay: 0.24s; }
+[data-reveal-delay="4"] { transition-delay: 0.32s; }
+[data-reveal-delay="5"] { transition-delay: 0.4s; }
+
+/* ── Floating ambient elements ───────────────────────────────────────── */
+.float-slow { animation: floatSlow 7s ease-in-out infinite; }
+.float-med { animation: floatSlow 5s ease-in-out infinite; }
+@keyframes floatSlow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+/* ── Pulse dot (bot status etc) ──────────────────────────────────────── */
+.pulse-dot { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); }
+.pulse-dot::after {
+  content: ''; position: absolute; inset: -4px; border-radius: 50%; background: var(--accent-green);
+  opacity: 0.5; animation: pulseRing 1.8s ease-out infinite;
+}
+@keyframes pulseRing { 0% { transform: scale(0.6); opacity: 0.6; } 100% { transform: scale(2.2); opacity: 0; } }
+
+/* ── Premium button polish (layers on top of existing .btn classes) ────── */
+.btn { position: relative; overflow: hidden; }
+.btn-primary { background: var(--grad-aurora) !important; color: #000 !important; box-shadow: 0 0 0 1px rgba(255,255,255,0.1) inset, 0 8px 30px -8px rgba(124,92,255,0.5); }
+.btn-primary:hover { box-shadow: 0 0 0 1px rgba(255,255,255,0.15) inset, 0 12px 40px -8px rgba(124,92,255,0.7); }
+.btn::after {
+  content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%;
+  background: rgba(255,255,255,0.35); transform: translate(-50%,-50%); pointer-events: none;
+}
+.btn.rippling::after { animation: rippleFx 0.6s ease-out; }
+@keyframes rippleFx { from { width: 0; height: 0; opacity: 0.6; } to { width: 280px; height: 280px; opacity: 0; } }
+
+/* ── Section scaffolding for landing page ───────────────────────────────── */
+.section { padding: 7rem 0; position: relative; }
+.section-inner { max-width: 1180px; margin: 0 auto; padding: 0 2rem; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent-cyan); margin-bottom: 1rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+.eyebrow::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan); }
+.section-title { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1.25rem; }
+.section-sub { font-family: var(--font-sans); font-size: 1.05rem; color: rgba(255,255,255,0.55); max-width: 560px; line-height: 1.65; }
+
+@media (max-width: 768px) {
+  .section { padding: 4.5rem 0; }
+  .pcur-dot, .pcur-ring, .pcur-glow { display: none; }
+  body.premium-cursor-active, body.premium-cursor-active * { cursor: auto !important; }
+}

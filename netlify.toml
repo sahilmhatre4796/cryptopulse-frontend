@@ -8,9 +8,7 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://api.coingecko.com https://api.alternative.me https://min-api.cryptocompare.com; img-src 'self' data: https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';"
-
-[[redirects]]
+   Content-Security-Policy: default-src 'self'; connect-src 'self' https://cryptopulse-backend-ht7y.onrender.com https://api.coingecko.com https://api.alternative.me https://min-api.cryptocompare.com;
   from = "/"
   to = "/index.html"
   status = 200

@@ -131,13 +131,13 @@ body { display: flex; align-items: center; justify-content: center; min-height: 
   <div class="live-strip">BTC <span id="btc-price">—</span> · ETH <span id="eth-price">—</span></div>
 </div>
 
-
+<script src="assets/app.js"></script>
 <script>
   // Point the API client at the deployed backend (update this URL after you
   // deploy to Render/Railway). During local dev, leave it as localhost:4000.
-  window.CP_API_BASE = 'https://cryptopulse-backend-ht7y.onrender.com';
+  // loaded from assets/config.js
 </script>
-  <script src="assets/app.js"></script>
+<script src="assets/config.js"></script>
 <script src="assets/api-client.js"></script>
 <script src="assets/scene3d.js"></script>
 <script src="assets/premium.js"></script>

@@ -71,17 +71,10 @@
         <!-- Main news feed -->
         <div class="card" style="padding:0 1.25rem">
           <div id="news-feed">
-            ${Array(8).fill().map(() => `
-              <div class="news-card">
-                <div class="news-card-num">&nbsp;</div>
-                <div class="news-card-content">
-                  <div class="skeleton" style="height:0.65rem;width:80px;margin-bottom:0.5rem"></div>
-                  <div class="skeleton" style="height:1rem;width:95%;margin-bottom:0.35rem"></div>
-                  <div class="skeleton" style="height:1rem;width:80%;margin-bottom:0.5rem"></div>
-                  <div class="skeleton" style="height:0.75rem;width:60%;margin-bottom:0.5rem"></div>
-                  <div class="skeleton" style="height:0.65rem;width:50%"></div>
-                </div>
-              </div>`).join('')}
+            <div class="news-card"><div class="news-card-num">&nbsp;</div><div class="news-card-content"><div class="skeleton" style="height:0.65rem;width:80px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;width:95%;margin-bottom:0.35rem"></div><div class="skeleton" style="height:1rem;width:80%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:0.65rem;width:50%"></div></div></div>
+            <div class="news-card"><div class="news-card-num">&nbsp;</div><div class="news-card-content"><div class="skeleton" style="height:0.65rem;width:70px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;width:90%;margin-bottom:0.35rem"></div><div class="skeleton" style="height:1rem;width:75%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:0.65rem;width:45%"></div></div></div>
+            <div class="news-card"><div class="news-card-num">&nbsp;</div><div class="news-card-content"><div class="skeleton" style="height:0.65rem;width:90px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;width:85%;margin-bottom:0.35rem"></div><div class="skeleton" style="height:1rem;width:70%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:0.65rem;width:55%"></div></div></div>
+            <div class="news-card"><div class="news-card-num">&nbsp;</div><div class="news-card-content"><div class="skeleton" style="height:0.65rem;width:75px;margin-bottom:0.5rem"></div><div class="skeleton" style="height:1rem;width:92%;margin-bottom:0.35rem"></div><div class="skeleton" style="height:1rem;width:78%;margin-bottom:0.5rem"></div><div class="skeleton" style="height:0.65rem;width:40%"></div></div></div>
           </div>
         </div>
 
@@ -90,14 +83,18 @@
           <div class="card mb-4">
             <div class="card-header"><span class="card-title">Top Stories</span></div>
             <div class="sidebar-news" id="top-stories">
-              ${Array(5).fill().map(() => `<div class="trending-news"><div class="skeleton" style="height:0.8rem;width:95%;margin-bottom:4px"></div><div class="skeleton" style="height:0.65rem;width:60%"></div></div>`).join('')}
+              <div class="trending-news"><div class="skeleton" style="height:0.8rem;width:95%;margin-bottom:4px"></div><div class="skeleton" style="height:0.65rem;width:60%"></div></div>
+              <div class="trending-news"><div class="skeleton" style="height:0.8rem;width:85%;margin-bottom:4px"></div><div class="skeleton" style="height:0.65rem;width:50%"></div></div>
+              <div class="trending-news"><div class="skeleton" style="height:0.8rem;width:90%;margin-bottom:4px"></div><div class="skeleton" style="height:0.65rem;width:65%"></div></div>
             </div>
           </div>
 
           <div class="card">
             <div class="card-header"><span class="card-title">Market Movers</span></div>
             <div id="market-movers">
-              ${Array(5).fill().map(() => `<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem"><div class="skeleton" style="width:24px;height:24px;border-radius:50%"></div><div style="flex:1"><div class="skeleton" style="height:0.75rem;width:80%;margin-bottom:3px"></div></div><div class="skeleton" style="height:0.65rem;width:50px"></div></div>`).join('')}
+              <div style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem"><div class="skeleton" style="width:24px;height:24px;border-radius:50%"></div><div style="flex:1"><div class="skeleton" style="height:0.75rem;width:80%;margin-bottom:3px"></div></div><div class="skeleton" style="height:0.65rem;width:50px"></div></div>
+              <div style="padding:0.5rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem"><div class="skeleton" style="width:24px;height:24px;border-radius:50%"></div><div style="flex:1"><div class="skeleton" style="height:0.75rem;width:70%;margin-bottom:3px"></div></div><div class="skeleton" style="height:0.65rem;width:50px"></div></div>
+              <div style="padding:0.5rem 0;display:flex;align-items:center;gap:0.75rem"><div class="skeleton" style="width:24px;height:24px;border-radius:50%"></div><div style="flex:1"><div class="skeleton" style="height:0.75rem;width:85%;margin-bottom:3px"></div></div><div class="skeleton" style="height:0.65rem;width:50px"></div></div>
             </div>
           </div>
         </div>
@@ -108,7 +105,7 @@
 </div>
 
 <script src="assets/app.js"></script>
-<script>window.CP_API_BASE = "https://cryptopulse-backend-ht7y.onrender.com";</script>
+<script src="assets/config.js"></script>
 <script src="assets/api-client.js"></script>
 <script src="assets/premium.js"></script>
 <script>

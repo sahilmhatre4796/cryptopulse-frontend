@@ -82,12 +82,16 @@ const CP = (() => {
   };
 
   // ── API ───────────────────────────────────────────────────────────────────
-  const COINGECKO = 'https://api.coingecko.com/api/v3';
-  const FEAR_GREED = 'https://api.alternative.me/fng/?limit=1';
-  const NEWS_API = 'https://min-api.cryptocompare.com/data/v2/news/?lang=EN&sortOrder=popular';
+  // ── API ───────────────────────────────────────────────────────────────────
+  // All market data goes through the backend proxy (/api/market/*) instead of
+  // calling CoinGecko/CryptoCompare directly from the browser. This eliminates:
+  //   • CORS errors (browsers block cross-origin requests from Netlify to CoinGecko)
+  //   • 429 rate limits (10 users share one server-side cache, not 10 separate rate limits)
+  //   • CSP violations (no extra connect-src entries needed for external APIs)
+  const getMarketBase = () => (window.CP_API_BASE || 'http://localhost:4000') + '/api/market';
 
   const cache = {};
-  const CACHE_TTL = 30000; // 30s
+  const CACHE_TTL = 30000;
 
   const fetchCached = async (key, url, ttl = CACHE_TTL) => {
     const now = Date.now();
@@ -101,25 +105,22 @@ const CP = (() => {
 
   const api = {
     getTopCoins: (n = 20) =>
-      fetchCached(`top_${n}`, `${COINGECKO}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${n}&page=1&sparkline=true`),
+      fetchCached(`top_${n}`, `${getMarketBase()}/coins?n=${n}`),
 
     getGlobal: () =>
-      fetchCached('global', `${COINGECKO}/global`, 60000),
+      fetchCached('global', `${getMarketBase()}/global`, 60000),
 
     getCoinHistory: (id, days = 7) =>
-      fetchCached(`history_${id}_${days}`, `${COINGECKO}/coins/${id}/market_chart?vs_currency=usd&days=${days}`),
-
-    getCoinDetail: (id) =>
-      fetchCached(`coin_${id}`, `${COINGECKO}/coins/${id}?localization=false&tickers=false&community_data=false&developer_data=false`, 60000),
+      fetchCached(`history_${id}_${days}`, `${getMarketBase()}/coin/${id}/history?days=${days}`),
 
     getFearGreed: () =>
-      fetchCached('fg', FEAR_GREED, 300000),
+      fetchCached('fg', `${getMarketBase()}/fear-greed`, 300000),
 
     getNews: () =>
-      fetchCached('news', NEWS_API, 300000),
+      fetchCached('news', `${getMarketBase()}/news`, 300000),
 
     getTrending: () =>
-      fetchCached('trending', `${COINGECKO}/search/trending`, 300000),
+      fetchCached('trending', `${getMarketBase()}/trending`, 300000),
   };
 
   // ── Portfolio ─────────────────────────────────────────────────────────────

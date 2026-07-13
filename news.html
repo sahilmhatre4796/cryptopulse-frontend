@@ -117,14 +117,15 @@ let allArticles = [];
 let currentCat = '';
 
 async function loadNews() {
+  const feed = document.getElementById('news-feed');
   try {
     const d = await CP.api.getNews();
-    allArticles = d?.Data || [];
-    document.getElementById('news-count').textContent = `${allArticles.length} articles available`;
+    allArticles = d?.articles || [];
+    document.getElementById('news-count').textContent = `Latest ${allArticles.length} articles`;
     renderFeed();
     renderTopStories();
   } catch(e) {
-    document.getElementById('news-feed').innerHTML = `<div style="padding:3rem;text-align:center;color:var(--fg-muted)"><div style="font-size:2rem;margin-bottom:1rem">📡</div><div>Unable to load news.<br>Please check your connection.</div></div>`;
+    feed.innerHTML = `<div style="padding:3rem;text-align:center;color:var(--fg-muted)"><div style="font-size:2rem;margin-bottom:1rem">📡</div><div>Unable to load news.<br>Please try refreshing.</div></div>`;
   }
 }
 
@@ -137,26 +138,26 @@ function setCategory(btn, cat) {
 
 function renderFeed() {
   let articles = allArticles;
-  if (currentCat) articles = articles.filter(a => (a.categories || '').toLowerCase().includes(currentCat.toLowerCase()) || (a.tags || '').toLowerCase().includes(currentCat.toLowerCase()));
+  if (currentCat) articles = articles.filter(a => (a.title || '').toLowerCase().includes(currentCat.toLowerCase()) || (a.source || '').toLowerCase().includes(currentCat.toLowerCase()));
   const feed = document.getElementById('news-feed');
   if (!articles.length) {
     feed.innerHTML = `<div style="padding:3rem;text-align:center;color:var(--fg-muted)"><div style="font-size:2rem;margin-bottom:1rem">🔍</div><div>No articles found for this category.</div><button class="btn btn-outline btn-sm" style="margin-top:1rem" onclick="document.querySelector('[data-cat=\\'\\']').click()">Show All</button></div>`;
     return;
   }
   document.getElementById('news-count').textContent = `${articles.length} of ${allArticles.length} articles`;
-  feed.innerHTML = articles.slice(0, 30).map((a, i) => {
+  feed.innerHTML = articles.slice(0, 10).map((a, i) => {
     const cats = (a.categories || '').split('|').filter(Boolean).slice(0, 3);
     return `
       <div class="news-card" data-article-url="${CP.escapeHtml(CP.safeUrl(a.url))}">
         <div class="news-card-num">${String(i + 1).padStart(2, '0')}</div>
         <div class="news-card-content">
           <div class="news-card-source">
-            ${CP.escapeHtml(a.source_info?.name || a.source || '—')}
+            ${CP.escapeHtml(a.source || '—')}
             <span style="color:var(--fg-muted);font-weight:400">·</span>
-            <span style="color:var(--fg-muted);font-weight:400">${CP.fmt.ago(a.published_on)}</span>
+            <span style="color:var(--fg-muted);font-weight:400">${CP.escapeHtml(new Date(a.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</span>
           </div>
           <div class="news-card-title">${CP.escapeHtml(a.title)}</div>
-          <div class="news-card-body">${CP.escapeHtml(a.body?.slice(0, 200) || '')}</div>
+          <div class="news-card-body">${CP.escapeHtml(a.description || '')}</div>
           <div class="news-tags">
             ${cats.map(c => `<span class="news-tag">${CP.escapeHtml(c.trim())}</span>`).join('')}
           </div>
@@ -176,7 +177,7 @@ function renderTopStories() {
   const top = document.getElementById('top-stories');
   top.innerHTML = allArticles.slice(0, 8).map(a => `
     <div class="trending-news">
-      <div class="news-card-source" style="margin-bottom:0.25rem">${CP.escapeHtml(a.source_info?.name || a.source || '—')} · ${CP.fmt.ago(a.published_on)}</div>
+      <div class="news-card-source" style="margin-bottom:0.25rem">${CP.escapeHtml(a.source || '—')} · ${CP.escapeHtml(new Date(a.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</div>
       <div class="trending-title" data-article-url="${CP.escapeHtml(CP.safeUrl(a.url))}">${CP.escapeHtml(a.title)}</div>
     </div>`).join('');
   document.querySelectorAll('.trending-title[data-article-url]').forEach(el => {

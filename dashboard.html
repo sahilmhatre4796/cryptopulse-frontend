@@ -319,14 +319,14 @@ async function loadFearGreed() {
 async function loadNews() {
   try {
     const d = await CP.api.getNews();
-    const articles = d?.Data?.slice(0, 3) || [];
+    const articles = d?.articles?.slice(0, 3) || [];
     const list = document.getElementById('news-list');
     if (!articles.length) { list.innerHTML = '<div class="muted" style="font-size:0.85rem;padding:1rem 0">No news available</div>'; return; }
     list.innerHTML = articles.map(a => `
       <div class="news-item fade-in">
-        <div class="news-source">${CP.escapeHtml(a.source_info?.name || a.source || '—')}</div>
+        <div class="news-source">${CP.escapeHtml(a.source || '—')}</div>
         <div class="news-title"><a href="${CP.escapeHtml(CP.safeUrl(a.url))}" target="_blank" rel="noopener noreferrer">${CP.escapeHtml(a.title)}</a></div>
-        <div class="news-meta">${CP.fmt.ago(a.published_on)} · ${CP.escapeHtml(a.categories?.split('|')[0] || 'General')}</div>
+        <div class="news-meta">${new Date(a.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})} · ${CP.escapeHtml(a.source || 'General')}</div>
       </div>`).join('');
   } catch(e) { document.getElementById('news-list').innerHTML = '<div class="muted" style="font-size:0.85rem;padding:1rem 0">News unavailable</div>'; }
 }

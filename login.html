@@ -4,9 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CryptoPulse — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://cryptopulse-backend-ht7y.onrender.com">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/premium.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 <style>
 body { display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; position: relative; }
 
@@ -198,6 +202,10 @@ body { display: flex; align-items: center; justify-content: center; min-height: 
       if (coins[1]) document.getElementById('eth-price').textContent = CP.fmt.price(coins[1].current_price);
     } catch(e) {}
   })();
+</script>
+<script>
+// Wake Render backend the moment login page opens
+try { fetch('https://cryptopulse-backend-ht7y.onrender.com/health',{method:'GET',mode:'no-cors',cache:'no-store'}).catch(function(){}); } catch(e) {}
 </script>
 </body>
 </html>

@@ -4,9 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CryptoPulse — The Crypto Terminal Built for What's Next</title>
+<!-- Preconnect to all external domains so connections start immediately -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://cryptopulse-backend-ht7y.onrender.com">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/premium.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 <style>
 body { background: var(--bg-void); overflow-x: hidden; }
 .noise-overlay { z-index: 9997; }
@@ -434,8 +439,8 @@ body { background: var(--bg-void); overflow-x: hidden; }
   </div>
 </footer>
 
-<script src="assets/app.js"></script>
-<script src="assets/premium.js"></script>
+<script src="assets/app.js" defer></script>
+<script src="assets/premium.js" defer></script>
 <script>
 // Nav scroll state
 window.addEventListener('scroll', () => {
@@ -499,6 +504,19 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+</script>
+
+<script>
+// Wake up the Render backend immediately so it's ready when user clicks login.
+// Render free tier sleeps after 15min — this silent ping starts the 30-60s
+// wake-up in the background, so the user never waits.
+(function wakeBackend() {
+  try {
+    fetch('https://cryptopulse-backend-ht7y.onrender.com/health', {
+      method: 'GET', mode: 'no-cors', cache: 'no-store'
+    }).catch(function(){});
+  } catch(e) {}
+})();
 </script>
 </body>
 </html>

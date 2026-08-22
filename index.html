@@ -202,8 +202,6 @@ body { background: var(--bg-void); overflow-x: hidden; }
     </div>
   </div>
 
-  <div class="hero-mockup" id="hero-mockup">
-    <canvas id="hero-coins" style="position:absolute;inset:-80px;width:calc(100% + 160px);height:calc(100% + 160px);z-index:0;opacity:0.7;pointer-events:none"></canvas>
   </div>
 
   <a href="#product" class="scroll-cue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
@@ -294,6 +292,68 @@ body { background: var(--bg-void); overflow-x: hidden; }
         <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bull">Bullish</span><div style="font-size:0.85rem;font-weight:600">Spot ETF inflows hit new monthly record</div></div>
         <div class="card news-mockup-item"><span class="sentiment-badge sentiment-neutral">Neutral</span><div style="font-size:0.85rem;font-weight:600">Exchange announces routine maintenance window</div></div>
         <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bear">Bearish</span><div style="font-size:0.85rem;font-weight:600">Regulator opens inquiry into stablecoin reserves</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── EXCHANGE CONNECTION ── -->
+<section class="section" id="exchange">
+  <div class="section-inner">
+    <div class="showcase-grid">
+      <div>
+        <div class="eyebrow" data-reveal>Integrations</div>
+        <h2 class="section-title" data-reveal>Connect your<br>exchanges.</h2>
+        <p class="section-sub" data-reveal data-reveal-delay="1">Link your Binance, Coinbase, Kraken, or any supported exchange via read-only API keys. Your portfolio syncs automatically — no manual entry, no CSV uploads.</p>
+        <div style="display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap" data-reveal data-reveal-delay="2">
+          <span class="sentiment-badge sentiment-bull" style="font-size:0.72rem;padding:0.35rem 0.8rem">Binance</span>
+          <span class="sentiment-badge sentiment-bull" style="font-size:0.72rem;padding:0.35rem 0.8rem">Coinbase</span>
+          <span class="sentiment-badge sentiment-bull" style="font-size:0.72rem;padding:0.35rem 0.8rem">Kraken</span>
+          <span class="sentiment-badge sentiment-neutral" style="font-size:0.72rem;padding:0.35rem 0.8rem">+12 more</span>
+        </div>
+      </div>
+      <div class="card demo-panel" data-reveal data-reveal-delay="2" style="padding:1.5rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--glass-border)">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(247,147,26,0.15);display:grid;place-items:center;color:#F7931A;font-weight:700;font-size:0.85rem">BN</div>
+          <div><div style="font-weight:600;font-size:0.9rem">Binance</div><div style="font-size:0.72rem;color:var(--fg-muted)">Connected · Read-only</div></div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:0.4rem"><span class="pulse-dot"></span><span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--accent-green)">Synced</span></div>
+        </div>
+        <div style="display:flex;gap:0.75rem">
+          <div class="demo-stat" style="flex:1"><div class="fc-label">Portfolio</div><div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700">$24,891</div></div>
+          <div class="demo-stat" style="flex:1"><div class="fc-label">Positions</div><div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700">8</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── TRADING BOT ── -->
+<section class="section" id="trading-bot">
+  <div class="section-inner">
+    <div class="showcase-grid reverse">
+      <div>
+        <div class="eyebrow" data-reveal>Coming Soon</div>
+        <h2 class="section-title" data-reveal>Automated trading<br>on autopilot.</h2>
+        <p class="section-sub" data-reveal data-reveal-delay="1">Set your strategy, define your risk, and let the bot execute 24/7. DCA, grid, momentum, arbitrage — built-in strategies that work while you sleep.</p>
+        <div style="display:flex;gap:1.5rem;margin-top:1.5rem" data-reveal data-reveal-delay="2">
+          <div><div style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--accent-green)">68%</div><div style="font-size:0.72rem;color:var(--fg-muted)">Avg win rate</div></div>
+          <div><div style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700">24/7</div><div style="font-size:0.72rem;color:var(--fg-muted)">Never stops</div></div>
+          <div><div style="font-family:var(--font-mono);font-size:1.4rem;font-weight:700;color:var(--accent-cyan)">$0</div><div style="font-size:0.72rem;color:var(--fg-muted)">Setup fee</div></div>
+        </div>
+      </div>
+      <div class="card demo-panel" data-reveal data-reveal-delay="2" style="padding:1.5rem">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--glass-border)">
+          <div style="width:40px;height:40px;border-radius:10px;background:rgba(124,92,252,0.15);display:grid;place-items:center;color:var(--premium-violet)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div><div style="font-weight:600;font-size:0.9rem">Grid Bot — ETH/USDT</div><div style="font-size:0.72rem;color:var(--accent-green)">Running · 142 trades today</div></div>
+        </div>
+        <div class="bot-stat-grid">
+          <div><div class="bot-stat-label">Total P&L</div><div class="bot-stat-val" style="color:var(--accent-green)">+$1,247</div></div>
+          <div><div class="bot-stat-label">Win rate</div><div class="bot-stat-val">73%</div></div>
+          <div><div class="bot-stat-label">Uptime</div><div class="bot-stat-val">99.8%</div></div>
+          <div><div class="bot-stat-label">Avg trade</div><div class="bot-stat-val">$8.74</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -478,18 +538,7 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  var globeCanvas = document.getElementById('hero-coins');
-  if (globeCanvas && window.THREE) {
-    var globe = CP3D.floatingCoins(globeCanvas);
-    if (typeof CP !== 'undefined' && CP.api) {
-      CP.api.getTopCoins(1).then(function(coins) {
-        var mpEl = document.getElementById('mockup-portfolio');
-        if (mpEl && coins[0]) {
-          mpEl.textContent = '$' + (coins[0].current_price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
-        }
-      }).catch(function() {});
-    }
-  }
+  // 3D scene removed per user request
 });
 </script>
 

@@ -290,7 +290,7 @@ const CP = (() => {
     defaultOptions: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: false,
+      animation: { duration: 300 },
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
@@ -308,8 +308,10 @@ const CP = (() => {
       scales: {
         x: { display: false },
         y: {
-          display: false,
-          grid: { display: false }
+          display: true,
+          position: 'right',
+          grid: { color: 'rgba(31,31,31,0.5)', drawBorder: false },
+          ticks: { display: false }
         }
       }
     },
@@ -344,7 +346,7 @@ const CP = (() => {
           datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: false, tension: 0.4, pointRadius: 0 }]
         },
         options: {
-          responsive: true, maintainAspectRatio: false, animation: false,
+          responsive: true, maintainAspectRatio: false, animation: { duration: 200 },
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: { x: { display: false }, y: { display: false } }
         }

@@ -72,6 +72,29 @@
 .news-title a:hover { color: var(--primary); }
 .news-meta { font-size: 0.56rem; color: var(--fg-muted); margin-top: 0.1rem; font-family: var(--font-mono); }
 
+/* ── Coming Soon Row ── */
+.coming-soon-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 0.6rem; }
+.coming-soon-card {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.85rem 1rem !important; position: relative;
+  opacity: 0.7; transition: opacity 0.2s;
+}
+.coming-soon-card:hover { opacity: 0.85; }
+.coming-soon-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.coming-soon-text { flex: 1; min-width: 0; }
+.coming-soon-title { font-size: 0.82rem; font-weight: 600; }
+.coming-soon-sub { font-size: 0.65rem; color: var(--fg-muted); margin-top: 0.1rem; line-height: 1.35; }
+.coming-soon-badge {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  padding: 0.2rem 0.55rem; border-radius: 100px;
+  background: rgba(255,255,255,0.06); color: var(--fg-muted);
+  text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
 /* ── Trending ── */
 .trend-item { display: flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0; border-bottom: 1px solid rgba(31,31,31,0.4); }
 .trend-item:last-child { border-bottom: none; }
@@ -169,6 +192,29 @@
         <div class="card">
           <div class="card-header"><span class="card-title">Trending</span></div>
           <div id="trending-list"></div>
+        </div>
+      </div>
+
+      <div class="coming-soon-row">
+        <div class="card coming-soon-card">
+          <div class="coming-soon-icon" style="background:var(--primary-dim);color:var(--primary)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="coming-soon-text">
+            <div class="coming-soon-title">Exchange Connection</div>
+            <div class="coming-soon-sub">Connect your favorite exchanges for live portfolio sync</div>
+          </div>
+          <span class="coming-soon-badge">Coming Soon</span>
+        </div>
+        <div class="card coming-soon-card">
+          <div class="coming-soon-icon" style="background:rgba(124,92,252,0.15);color:var(--premium-violet)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="coming-soon-text">
+            <div class="coming-soon-title">Trading Bot</div>
+            <div class="coming-soon-sub">Automated strategies that execute while you sleep</div>
+          </div>
+          <span class="coming-soon-badge">Coming Soon</span>
         </div>
       </div>
 

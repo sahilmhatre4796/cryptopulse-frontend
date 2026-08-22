@@ -116,7 +116,7 @@ a { color: inherit; text-decoration: none; }
 .sidebar-bottom { padding: 1rem 0.75rem; border-top: 1px solid var(--border); }
 
 /* ── Main Content ── */
-.main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.main-content { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
 .topbar {
   position: sticky; top: 0; z-index: 90;
   background: rgba(5,5,5,0.85);

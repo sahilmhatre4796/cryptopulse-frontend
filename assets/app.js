@@ -290,6 +290,7 @@ const CP = (() => {
     defaultOptions: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
@@ -307,10 +308,8 @@ const CP = (() => {
       scales: {
         x: { display: false },
         y: {
-          display: true,
-          position: 'right',
-          grid: { color: 'rgba(31,31,31,0.8)', drawBorder: false },
-          ticks: { color: '#888', font: { family: 'JetBrains Mono', size: 10 }, callback: (v) => '$' + v.toLocaleString() }
+          display: false,
+          grid: { display: false }
         }
       }
     },
@@ -345,7 +344,7 @@ const CP = (() => {
           datasets: [{ data, borderColor: color, borderWidth: 1.5, fill: false, tension: 0.4, pointRadius: 0 }]
         },
         options: {
-          responsive: true, maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false, animation: false,
           plugins: { legend: { display: false }, tooltip: { enabled: false } },
           scales: { x: { display: false }, y: { display: false } }
         }

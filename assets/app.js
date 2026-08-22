@@ -121,6 +121,18 @@ const CP = (() => {
 
     getTrending: () =>
       fetchCached('trending', `${getMarketBase()}/trending`, 300000),
+
+    getDexPairs: (chain = 'solana') =>
+      fetchCached(`dex_${chain}`, `${getMarketBase()}/dex?chain=${chain}`, 60000),
+
+    searchDex: (q) =>
+      fetchCached(`dex_search_${q}`, `${getMarketBase()}/dex/search?q=${encodeURIComponent(q)}`, 30000),
+
+    getDexTrending: () =>
+      fetchCached('dex_trending', `${getMarketBase()}/dex/trending`, 60000),
+
+    getFearGreedHistory: (limit = 30) =>
+      fetchCached(`fg_${limit}`, `${getMarketBase()}/fear-greed?limit=${limit}`, 300000),
   };
 
   // ── Portfolio ─────────────────────────────────────────────────────────────

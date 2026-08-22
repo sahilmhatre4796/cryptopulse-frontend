@@ -28,6 +28,16 @@
   --font-body: 'Manrope', system-ui, sans-serif;
   --font-heading: 'Unbounded', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+
+  --premium-gold: #F7B731;
+  --premium-gold-dim: rgba(247,183,49,0.15);
+  --premium-glow: rgba(0,240,255,0.25);
+  --premium-violet: #7C5CFC;
+  --premium-pink: #FF5FB8;
+  --grad-premium: linear-gradient(135deg, var(--premium-violet) 0%, var(--primary) 50%, var(--premium-pink) 100%);
+  --data-positive: #00FF94;
+  --data-negative: #FF2E2E;
+  --data-neutral: #888888;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

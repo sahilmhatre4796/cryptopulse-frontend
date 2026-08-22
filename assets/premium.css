@@ -167,6 +167,51 @@
 }
 
 
+/* ── Data visualization patterns ──────────────────────────────────────── */
+.data-grid {
+  background-image: linear-gradient(rgba(0,240,255,0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,240,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.fear-greed-gauge {
+  width: 200px; height: 100px; position: relative;
+  background: conic-gradient(from 180deg, #FF2E2E 0deg, #F7B731 60deg, #00FF94 120deg, #00FF94 180deg);
+  border-radius: 100px 100px 0 0;
+  overflow: hidden;
+}
+.fear-greed-needle {
+  position: absolute; bottom: 0; left: 50%; width: 3px; height: 80px;
+  background: #fff; transform-origin: bottom center; transition: transform 1s ease;
+  box-shadow: 0 0 10px rgba(255,255,255,0.8);
+}
+
+.dex-pair-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.dex-pair-card:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0,240,255,0.15);
+}
+
+.sparkline-container {
+  height: 40px; position: relative;
+}
+
+.trending-badge {
+  background: var(--grad-aurora);
+  color: #000;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
 /* ── Performance: disable heavy GPU effects on mobile/low-end ──────────── */
 @media (max-width: 768px) {
   .aurora-blob { filter: blur(20px) !important; animation-duration: 60s !important; }

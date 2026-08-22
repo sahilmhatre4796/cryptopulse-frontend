@@ -172,6 +172,23 @@ const subscriptionApi = {
   get: () => apiFetch('/api/subscription'),
 };
 
+// ── DEX Market API ─────────────────────────────────────────────────────────────
+const dexApi = {
+  getPairs:    (chain = 'solana') => apiFetch(`/api/market/dex?chain=${chain}`),
+  search:      (q)                => apiFetch(`/api/market/dex/search?q=${encodeURIComponent(q)}`),
+  getTrending: ()                 => apiFetch('/api/market/dex/trending'),
+};
+
+// ── Enhanced Market API ────────────────────────────────────────────────────────
+const marketApi = {
+  getTopCoins:     (n = 20)            => apiFetch(`/api/market/coins?n=${n}`),
+  getGlobal:       ()                  => apiFetch('/api/market/global'),
+  getCoinHistory:  (id, days = 7)      => apiFetch(`/api/market/coin/${id}/history?days=${days}`),
+  getFearGreed:    (limit = 30)        => apiFetch(`/api/market/fear-greed?limit=${limit}`),
+  getNews:         ()                  => apiFetch('/api/market/news'),
+  getTrending:     ()                  => apiFetch('/api/market/trending'),
+};
+
 // ── Override CP.auth and expose new API namespaces ───────────────────────────
 // After this file loads, code that previously called CP.auth.login() now
 // calls the real server. All other CP.* helpers (fmt, charts, nav) are
@@ -179,7 +196,6 @@ const subscriptionApi = {
 if (typeof CP !== 'undefined') {
   CP.auth = realAuth;
 
-  // Old localStorage portfolio/watchlist stubs → replaced by server calls
   CP.portfolioApi    = portfolioApi;
   CP.watchlistApi    = watchlistApi;
   CP.alertsApi       = alertsApi;
@@ -187,7 +203,8 @@ if (typeof CP !== 'undefined') {
   CP.exchangeKeysApi = exchangeKeysApi;
   CP.transactionsApi = transactionsApi;
   CP.subscriptionApi = subscriptionApi;
+  CP.dexApi          = dexApi;
+  CP.marketApi       = marketApi;
 }
 
-// Also expose at window level for convenience
-window.CPApi = { portfolioApi, watchlistApi, alertsApi, botsApi, exchangeKeysApi, transactionsApi, subscriptionApi };
+window.CPApi = { portfolioApi, watchlistApi, alertsApi, botsApi, exchangeKeysApi, transactionsApi, subscriptionApi, dexApi, marketApi };

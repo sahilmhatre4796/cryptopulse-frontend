@@ -127,15 +127,69 @@ const Premium = (() => {
     els.forEach(el => obs.observe(el));
   }
 
+  function initParallax(selector = '[data-parallax]') {
+    if (reduceMotion) return;
+    var els = document.querySelectorAll(selector);
+    if (!els.length) return;
+    function onScroll() {
+      var sy = window.scrollY;
+      els.forEach(function(el) {
+        var speed = parseFloat(el.getAttribute('data-parallax')) || 0.1;
+        var rect = el.getBoundingClientRect();
+        var offset = (rect.top + sy - window.innerHeight / 2) * speed;
+        el.style.transform = 'translateY(' + (-offset) + 'px)';
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+
+  function initProgressBars(selector = '.progress-fill[data-width]') {
+    var els = document.querySelectorAll(selector);
+    if (!els.length) return;
+    if (reduceMotion) { els.forEach(function(el) { el.style.width = el.getAttribute('data-width'); }); return; }
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.style.width = entry.target.getAttribute('data-width');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.3 });
+    els.forEach(function(el) { el.style.width = '0%'; obs.observe(el); });
+  }
+
+  function initDataCounters(selector = '[data-count-to]') {
+    var els = document.querySelectorAll(selector);
+    if (!els.length) return;
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var el = entry.target;
+          var target = parseFloat(el.getAttribute('data-count-to')) || 0;
+          var prefix = el.getAttribute('data-prefix') || '';
+          var suffix = el.getAttribute('data-suffix') || '';
+          var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+          countUp(el, target, { prefix: prefix, suffix: suffix, decimals: decimals });
+          obs.unobserve(el);
+        }
+      });
+    }, { threshold: 0.3 });
+    els.forEach(function(el) { obs.observe(el); });
+  }
+
   // ── Auto-init everything safe to run on any page ───────────────────────
   function autoInit() {
     initCursor();
     initMagnetic();
     initTilt('.card');
     initReveal();
+    initParallax();
+    initProgressBars();
+    initDataCounters();
   }
 
-  return { initCursor, initMagnetic, initTilt, countUp, initReveal, autoInit };
+  return { initCursor, initMagnetic, initTilt, countUp, initReveal, initParallax, initProgressBars, initDataCounters, autoInit };
 })();
 
 document.addEventListener('DOMContentLoaded', () => Premium.autoInit());

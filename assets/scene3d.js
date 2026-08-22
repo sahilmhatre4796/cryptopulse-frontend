@@ -156,5 +156,135 @@ const CP3D = (() => {
     return { destroy: () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); renderer.dispose(); } };
   }
 
-  return { particleNetwork, rotatingCoin };
+  function marketGlobe(canvas, coinData) {
+    if (!window.THREE) return null;
+    var THREE = window.THREE;
+    coinData = coinData || [];
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0, 4);
+
+    var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+    var dirLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
+    dirLight.position.set(5, 3, 5);
+    scene.add(dirLight);
+    var backLight = new THREE.DirectionalLight(0x7c5cfc, 0.8);
+    backLight.position.set(-5, -3, -5);
+    scene.add(backLight);
+
+    var globeGroup = new THREE.Group();
+    scene.add(globeGroup);
+
+    var sphereGeo = new THREE.SphereGeometry(1.2, 64, 64);
+    var sphereMat = new THREE.MeshStandardMaterial({ color: 0x050510, metalness: 0.3, roughness: 0.7, transparent: true, opacity: 0.9 });
+    globeGroup.add(new THREE.Mesh(sphereGeo, sphereMat));
+
+    var wireGeo = new THREE.SphereGeometry(1.22, 32, 32);
+    var wireMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, wireframe: true, transparent: true, opacity: 0.08 });
+    var wireGlobe = new THREE.Mesh(wireGeo, wireMat);
+    globeGroup.add(wireGlobe);
+
+    var latLines = new THREE.Group();
+    var lat, r, y, curve, pts, lGeo, lMat;
+    for (lat = -60; lat <= 60; lat += 30) {
+      r = 1.23 * Math.cos(lat * Math.PI / 180);
+      y = 1.23 * Math.sin(lat * Math.PI / 180);
+      curve = new THREE.EllipseCurve(0, 0, r, r, 0, 2 * Math.PI, false);
+      pts = curve.getPoints(64);
+      lGeo = new THREE.BufferGeometry().setFromPoints(pts.map(function(p) { return new THREE.Vector3(p.x, y, p.y); }));
+      lMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.1 });
+      latLines.add(new THREE.Line(lGeo, lMat));
+    }
+    globeGroup.add(latLines);
+
+    var pinGroup = new THREE.Group();
+    globeGroup.add(pinGroup);
+
+    function placePins(data) {
+      while (pinGroup.children.length) pinGroup.remove(pinGroup.children[0]);
+      var coins = data.slice(0, 12);
+      coins.forEach(function(coin, i) {
+        var phi = Math.acos(-1 + (2 * i) / coins.length);
+        var theta = Math.sqrt(coins.length * Math.PI) * phi;
+        var pinColor = (coin.price_change_percentage_24h || 0) >= 0 ? 0x00ff94 : 0xff2e2e;
+        var pinGeo = new THREE.SphereGeometry(0.025, 8, 8);
+        var pinMat = new THREE.MeshBasicMaterial({ color: pinColor });
+        var pin = new THREE.Mesh(pinGeo, pinMat);
+        var px = 1.24 * Math.sin(phi) * Math.cos(theta);
+        var py = 1.24 * Math.sin(phi) * Math.sin(theta);
+        var pz = 1.24 * Math.cos(phi);
+        pin.position.set(px, py, pz);
+        pinGroup.add(pin);
+        var glowGeo = new THREE.SphereGeometry(0.045, 8, 8);
+        var glowMat = new THREE.MeshBasicMaterial({ color: pinColor, transparent: true, opacity: 0.25 });
+        var glow = new THREE.Mesh(glowGeo, glowMat);
+        glow.position.copy(pin.position);
+        pinGroup.add(glow);
+      });
+    }
+    placePins(coinData);
+
+    var ringCount = 200;
+    var ringPos = new Float32Array(ringCount * 3);
+    var ringCol = new Float32Array(ringCount * 3);
+    var i, angle, radius, hc;
+    for (i = 0; i < ringCount; i++) {
+      angle = (i / ringCount) * Math.PI * 2;
+      radius = 1.6 + (Math.random() - 0.5) * 0.2;
+      ringPos[i * 3] = Math.cos(angle) * radius;
+      ringPos[i * 3 + 1] = (Math.random() - 0.5) * 0.1;
+      ringPos[i * 3 + 2] = Math.sin(angle) * radius;
+      hc = new THREE.Color().setHSL(0.5 + Math.random() * 0.15, 1, 0.6);
+      ringCol[i * 3] = hc.r; ringCol[i * 3 + 1] = hc.g; ringCol[i * 3 + 2] = hc.b;
+    }
+    var ringGeo = new THREE.BufferGeometry();
+    ringGeo.setAttribute('position', new THREE.BufferAttribute(ringPos, 3));
+    ringGeo.setAttribute('color', new THREE.BufferAttribute(ringCol, 3));
+    var ringMat = new THREE.PointsMaterial({ size: 0.012, transparent: true, opacity: 0.6, vertexColors: true, sizeAttenuation: true });
+    var ringParticles = new THREE.Points(ringGeo, ringMat);
+    globeGroup.add(ringParticles);
+
+    var raf;
+    var mouseX = 0, mouseY = 0;
+    function onMove(e) {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    }
+    window.addEventListener('mousemove', onMove);
+
+    function resize() {
+      var w = canvas.clientWidth, h = canvas.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function animate() {
+      globeGroup.rotation.y += 0.002;
+      globeGroup.rotation.x += (mouseY * 0.15 - globeGroup.rotation.x) * 0.02;
+      globeGroup.rotation.z += (mouseX * -0.1 - globeGroup.rotation.z) * 0.02;
+      ringParticles.rotation.y -= 0.003;
+      wireGlobe.rotation.y += 0.001;
+      renderer.render(scene, camera);
+      raf = requestAnimationFrame(animate);
+    }
+    animate();
+
+    return {
+      updateData: function(newData) { placePins(newData); },
+      destroy: function() {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', resize);
+        window.removeEventListener('mousemove', onMove);
+        renderer.dispose();
+      }
+    };
+  }
+
+  return { particleNetwork, rotatingCoin, marketGlobe };
 })();

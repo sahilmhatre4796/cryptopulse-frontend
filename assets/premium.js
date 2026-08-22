@@ -181,8 +181,6 @@ const Premium = (() => {
   // ── Auto-init everything safe to run on any page ───────────────────────
   function autoInit() {
     initCursor();
-    initMagnetic();
-    initTilt('.card');
     initReveal();
     initParallax();
     initProgressBars();

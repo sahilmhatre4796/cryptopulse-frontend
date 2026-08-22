@@ -188,7 +188,7 @@ function applyFilter() {
   filtered = data;
   renderTable();
   renderPagination();
-  setTimeout(() => { Premium.initTilt('.card'); Premium.initMagnetic(); }, 100);
+  // No tilt/magnetic effects on markets page
 }
 
 function filterCoins() { currentPage = 1; applyFilter(); }

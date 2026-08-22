@@ -96,6 +96,7 @@
         <div class="card">
           <div class="card-header"><span class="card-title">Allocation</span></div>
           <div class="donut-wrap"><canvas id="donut-chart"></canvas></div>
+          <div id="alloc-bars" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem"></div>
           <div class="donut-legend" id="donut-legend"></div>
         </div>
       </div>
@@ -257,6 +258,18 @@ function renderDonut(rows) {
     }
   });
   const total = rows.reduce((s, r) => s + r.value, 0);
+  const barsContainer = document.getElementById('alloc-bars');
+  barsContainer.innerHTML = rows.sort((a, b) => b.value - a.value).map(r => {
+    const pct = total > 0 ? (r.value / total) * 100 : 0;
+    const color = CP.getCoinColor(r.coinId);
+    return `<div class="alloc-bar-row" style="display:flex;align-items:center;gap:0.5rem">
+      <span style="font-size:0.7rem;font-weight:700;width:42px;text-align:right;color:${color}">${r.symbol.toUpperCase().slice(0,4)}</span>
+      <div class="data-grid" style="flex:1;height:8px;background:var(--bg-muted);border-radius:4px;overflow:hidden;padding:0">
+        <div class="progress-fill" data-width="${pct.toFixed(1)}" style="width:${pct.toFixed(1)}%;height:100%;background:${color};border-radius:4px;transition:width 0.8s cubic-bezier(0.22,1,0.36,1)"></div>
+      </div>
+      <span style="font-size:0.7rem;font-family:var(--font-mono);color:var(--fg-muted);width:40px">${pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
   legend.innerHTML = rows.sort((a, b) => b.value - a.value).map(r => `
     <div class="legend-item">
       <div class="legend-dot" style="background:${CP.getCoinColor(r.coinId)}"></div>

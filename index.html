@@ -212,7 +212,8 @@ body { background: var(--bg-void); overflow-x: hidden; }
   </div>
 
   <div class="hero-mockup" id="hero-mockup">
-    <div class="card float-card fc1 float-slow"><div class="fc-label">Portfolio value</div><div class="fc-value" id="mockup-portfolio">$0</div><div class="fc-change">+12.4% this month</div></div>
+    <canvas id="hero-globe" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;opacity:0.6;pointer-events:none"></canvas>
+    <div class="card float-card fc1 float-slow" style="z-index:2"><div class="fc-label">Portfolio value</div><div class="fc-value" id="mockup-portfolio">$0</div><div class="fc-change">+12.4% this month</div></div>
     <div class="card float-card fc2 float-med">
       <div class="fc-label">BTC / USD</div>
       <svg width="100%" height="50" viewBox="0 0 200 50" preserveAspectRatio="none" style="margin-top:0.4rem">
@@ -503,6 +504,20 @@ window.addEventListener('DOMContentLoaded', () => {
       if (!wasOpen) item.classList.add('open');
     });
   });
+
+  var globeCanvas = document.getElementById('hero-globe');
+  if (globeCanvas && window.THREE) {
+    var globe = CP3D.marketGlobe(globeCanvas, []);
+    if (typeof CP !== 'undefined' && CP.api) {
+      CP.api.getTopCoins(12).then(function(coins) {
+        if (globe && globe.updateData) globe.updateData(coins);
+        var mpEl = document.getElementById('mockup-portfolio');
+        if (mpEl && coins[0]) {
+          mpEl.textContent = '$' + (coins[0].current_price || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+        }
+      }).catch(function() {});
+    }
+  }
 });
 </script>
 

@@ -52,6 +52,11 @@
         </div>
       </div>
 
+      <div class="tabs" id="market-tabs">
+        <button class="tab active" onclick="switchMarketTab('cex')">CEX Markets</button>
+        <button class="tab" onclick="switchMarketTab('dex')">DEX Markets</button>
+      </div>
+
       <!-- Category filters -->
       <div class="filter-bar mb-4">
         <button class="btn btn-ghost btn-sm cat-btn active" data-filter="all" onclick="setFilter(this,'all')">All Coins</button>
@@ -61,7 +66,7 @@
       </div>
 
       <!-- Table -->
-      <div class="card" style="padding:0;overflow-x:auto">
+      <div class="card" style="padding:0;overflow-x:auto" id="cex-panel">
         <table class="data-table" id="coins-table">
           <thead>
             <tr>
@@ -87,9 +92,41 @@
         </table>
       </div>
 
-      <div class="page-controls" id="pagination"></div>
+      <div class="card hidden" id="dex-panel" style="padding:0;overflow-x:auto">
+        <div style="padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;border-bottom:1px solid var(--border);flex-wrap:wrap">
+          <span class="card-title">DEX Pairs</span>
+          <select class="input" id="dex-chain" style="width:160px;padding:0.45rem 0.75rem;font-size:0.78rem" onchange="loadDexPairs()">
+            <option value="solana">Solana</option>
+            <option value="ethereum">Ethereum</option>
+            <option value="base">Base</option>
+            <option value="arbitrum">Arbitrum</option>
+            <option value="bsc">BSC</option>
+            <option value="polygon">Polygon</option>
+          </select>
+          <div class="flex gap-1 items-center">
+            <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+            <span style="font-size:0.7rem;color:var(--fg-muted);font-family:var(--font-mono)">DEXSCREENER</span>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Pair</th>
+              <th>DEX</th>
+              <th>Price</th>
+              <th>24h %</th>
+              <th class="hide-sm">Liquidity</th>
+              <th class="hide-sm">Volume 24h</th>
+              <th class="hide-md">FDV</th>
+            </tr>
+          </thead>
+          <tbody id="dex-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--fg-muted);font-size:0.85rem">Select a chain to load DEX pairs</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    </div>
+      <div class="page-controls" id="pagination"></div>
   </main>
 </div>
 
@@ -260,6 +297,60 @@ async function toggleWatch(id, btn) {
 
 loadWatchlist().then(() => loadCoins());
 setInterval(loadCoins, 60000);
+
+function switchMarketTab(tab) {
+  document.querySelectorAll('#market-tabs .tab').forEach(t => t.classList.remove('active'));
+  var cexPanel = document.getElementById('cex-panel');
+  var dexPanel = document.getElementById('dex-panel');
+  var pagination = document.getElementById('pagination');
+  var filterBar = document.querySelector('.filter-bar');
+  if (tab === 'dex') {
+    document.querySelectorAll('#market-tabs .tab')[1].classList.add('active');
+    cexPanel.classList.add('hidden');
+    dexPanel.classList.remove('hidden');
+    if (pagination) pagination.classList.add('hidden');
+    if (filterBar) filterBar.classList.add('hidden');
+    loadDexPairs();
+  } else {
+    document.querySelectorAll('#market-tabs .tab')[0].classList.add('active');
+    cexPanel.classList.remove('hidden');
+    dexPanel.classList.add('hidden');
+    if (pagination) pagination.classList.remove('hidden');
+    if (filterBar) filterBar.classList.remove('hidden');
+  }
+}
+
+async function loadDexPairs() {
+  var chain = document.getElementById('dex-chain').value;
+  var tbody = document.getElementById('dex-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></td></tr>';
+  try {
+    var r = await CP.api.getDexPairs(chain);
+    var pairs = (r && r.pairs) ? r.pairs.slice(0, 25) : [];
+    if (!pairs.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--fg-muted)">No DEX pairs found for this chain</td></tr>';
+      return;
+    }
+    tbody.innerHTML = pairs.map(function(p) {
+      var chg = (p.priceChange && p.priceChange.h24) || 0;
+      var chgClass = chg >= 0 ? 'badge-up' : 'badge-down';
+      var liq = p.liquidity && p.liquidity.usd ? CP.fmt.compact(p.liquidity.usd) : '—';
+      var vol = p.volume && p.volume.h24 ? CP.fmt.compact(p.volume.h24) : '—';
+      var fdv = p.fdv ? CP.fmt.compact(p.fdv) : '—';
+      return '<tr class="fade-in">' +
+        '<td><div style="font-weight:600;font-size:0.85rem">' + CP.escapeHtml(p.baseToken ? p.baseToken.symbol : '?') + '</div><div style="font-size:0.72rem;color:var(--fg-muted)">' + CP.escapeHtml(p.quoteToken ? p.quoteToken.symbol : '?') + '</div></td>' +
+        '<td style="font-size:0.78rem;color:var(--fg-muted)">' + CP.escapeHtml(p.dexId || '—') + '</td>' +
+        '<td class="price">' + (p.priceUsd ? '$' + parseFloat(p.priceUsd).toLocaleString('en-US', {maximumFractionDigits: 6}) : '—') + '</td>' +
+        '<td><span class="badge ' + chgClass + '">' + CP.fmt.pct(chg) + '</span></td>' +
+        '<td class="hide-sm" style="font-family:var(--font-mono);font-size:0.82rem">' + liq + '</td>' +
+        '<td class="hide-sm" style="font-family:var(--font-mono);font-size:0.82rem">' + vol + '</td>' +
+        '<td class="hide-md" style="font-family:var(--font-mono);font-size:0.82rem">' + fdv + '</td>' +
+        '</tr>';
+    }).join('');
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--danger)">Failed to load DEX data</td></tr>';
+  }
+}
 </script>
 </body>
 </html>

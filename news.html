@@ -136,6 +136,18 @@ function setCategory(btn, cat) {
   renderFeed();
 }
 
+function getSentiment(text) {
+  const t = text.toLowerCase();
+  const bull = ['surge', 'rally', 'bull', 'breakout', 'soar', 'gain', 'rise', 'pump', 'adoption', 'approval', 'record', 'high', 'growth', 'boost', 'recovery', 'inflow', 'accumulate', 'milestone'];
+  const bear = ['crash', 'bear', 'plunge', 'drop', 'fall', 'sell', 'dump', 'ban', 'hack', 'exploit', 'scam', 'fraud', 'lawsuit', 'decline', 'outflow', 'liquidat', 'fear', 'risk', 'vulnerab', 'stolen'];
+  let score = 0;
+  bull.forEach(w => { if (t.includes(w)) score++; });
+  bear.forEach(w => { if (t.includes(w)) score--; });
+  if (score > 0) return { label: 'BULLISH', bg: 'rgba(0,200,83,0.12)', color: 'var(--data-positive, #00c853)', border: 'rgba(0,200,83,0.25)' };
+  if (score < 0) return { label: 'BEARISH', bg: 'rgba(255,56,56,0.12)', color: 'var(--data-negative, #ff3838)', border: 'rgba(255,56,56,0.25)' };
+  return { label: 'NEUTRAL', bg: 'rgba(255,255,255,0.06)', color: 'var(--fg-muted)', border: 'rgba(255,255,255,0.1)' };
+}
+
 function renderFeed() {
   let articles = allArticles;
   if (currentCat) articles = articles.filter(a => (a.title || '').toLowerCase().includes(currentCat.toLowerCase()) || (a.source || '').toLowerCase().includes(currentCat.toLowerCase()));
@@ -147,6 +159,7 @@ function renderFeed() {
   document.getElementById('news-count').textContent = `${articles.length} of ${allArticles.length} articles`;
   feed.innerHTML = articles.slice(0, 10).map((a, i) => {
     const cats = (a.categories || '').split('|').filter(Boolean).slice(0, 3);
+    const sentiment = getSentiment(a.title + ' ' + (a.description || ''));
     return `
       <div class="news-card" data-article-url="${CP.escapeHtml(CP.safeUrl(a.url))}">
         <div class="news-card-num">${String(i + 1).padStart(2, '0')}</div>
@@ -155,6 +168,7 @@ function renderFeed() {
             ${CP.escapeHtml(a.source || '—')}
             <span style="color:var(--fg-muted);font-weight:400">·</span>
             <span style="color:var(--fg-muted);font-weight:400">${CP.escapeHtml(new Date(a.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</span>
+            <span class="trending-badge" style="background:${sentiment.bg};color:${sentiment.color};border:1px solid ${sentiment.border}">${sentiment.label}</span>
           </div>
           <div class="news-card-title">${CP.escapeHtml(a.title)}</div>
           <div class="news-card-body">${CP.escapeHtml(a.description || '')}</div>

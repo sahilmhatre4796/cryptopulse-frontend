@@ -229,6 +229,8 @@ const CP = (() => {
         { id: 'markets', href: 'markets.html', label: 'Markets', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>` },
         { id: 'portfolio', href: 'portfolio.html', label: 'Portfolio', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>` },
         { id: 'news', href: 'news.html', label: 'News', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></svg>` },
+        { id: 'exchange', href: '#', label: 'Exchanges', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`, comingSoon: true },
+        { id: 'trading-bot', href: '#', label: 'Trading Bot', icon: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, comingSoon: true },
       ];
       const sidebar = document.getElementById('sidebar');
       if (!sidebar) return;
@@ -241,7 +243,11 @@ const CP = (() => {
         </div>
         <nav class="sidebar-nav">
           <div class="nav-section-label">Main</div>
-          ${links.map(l => `
+          ${links.map(l => l.comingSoon ? `
+            <div class="nav-link" style="opacity:0.5;cursor:default;pointer-events:none">
+              ${l.icon} ${l.label}
+              <span style="margin-left:auto;font-family:var(--font-mono);font-size:0.5rem;padding:0.15rem 0.4rem;border-radius:100px;background:rgba(255,255,255,0.06);color:var(--fg-muted);letter-spacing:0.05em;white-space:nowrap">SOON</span>
+            </div>` : `
             <a href="${l.href}" class="nav-link ${activePage === l.id ? 'active' : ''}">
               ${l.icon} ${l.label}
             </a>`).join('')}

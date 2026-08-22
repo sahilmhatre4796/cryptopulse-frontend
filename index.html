@@ -248,13 +248,10 @@ body { background: var(--bg-void); overflow-x: hidden; }
       <h2 class="section-title" data-reveal>Your portfolio,<br>reimagined.</h2>
       <p class="section-sub" style="margin:0 auto" data-reveal data-reveal-delay="1">Every position, every signal, every basis point — rendered live, with zero spreadsheet residue.</p>
     </div>
-    <div class="card demo-panel grad-border" style="max-width:760px;margin:0 auto" data-reveal data-reveal-delay="2">
-      <div class="demo-stat-row">
-        <div class="demo-stat"><div class="fc-label">Total value</div><div class="fc-value" id="demo-total">$0</div></div>
-        <div class="demo-stat"><div class="fc-label">24h change</div><div class="fc-value" style="color:var(--accent-green)">+3.8%</div></div>
-        <div class="demo-stat"><div class="fc-label">Active bots</div><div class="fc-value">4</div></div>
-      </div>
-      <div class="demo-bars" id="demo-bars"></div>
+    <div class="feature-video-card" style="max-width:760px;margin:0 auto" data-reveal data-reveal-delay="2">
+      <video autoplay muted loop playsinline preload="metadata" loading="lazy">
+        <source src="assets/vid-product.mp4" type="video/mp4">
+      </video>
     </div>
   </div>
 </section>
@@ -268,11 +265,10 @@ body { background: var(--bg-void); overflow-x: hidden; }
         <h2 class="section-title" data-reveal>Ask anything<br>about the market.</h2>
         <p class="section-sub" data-reveal data-reveal-delay="1">Plain-English questions in, institutional-grade answers out. Your portfolio context is always in the loop — no tab-switching required.</p>
       </div>
-      <div class="card chat-mockup" data-reveal data-reveal-delay="2">
-        <div class="chat-bubble user">Why did SOL drop this morning?</div>
-        <div class="chat-bubble ai">Solana fell 4.2% after a large validator unstaking event triggered short-term liquidity pressure. Sentiment remains net-bullish — trending term across news sources is "network upgrade," not "sell-off."</div>
-        <div class="chat-bubble user">Should I add to my position?</div>
-        <div class="chat-bubble ai"><span class="typing-dots"><span></span><span></span><span></span></span></div>
+      <div class="feature-video-card" data-reveal data-reveal-delay="2">
+        <video autoplay muted loop playsinline preload="metadata" loading="lazy">
+          <source src="assets/vid-ai.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </div>
@@ -321,10 +317,10 @@ body { background: var(--bg-void); overflow-x: hidden; }
         <h2 class="section-title" data-reveal>News, decoded<br>in real time.</h2>
         <p class="section-sub" data-reveal data-reveal-delay="1">Thousands of articles, filtered down to sentiment that actually moves your positions — bullish, bearish, or noise.</p>
       </div>
-      <div class="news-mockup-list" data-reveal data-reveal-delay="2">
-        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bull">Bullish</span><div style="font-size:0.85rem;font-weight:600">Spot ETF inflows hit new monthly record</div></div>
-        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-neutral">Neutral</span><div style="font-size:0.85rem;font-weight:600">Exchange announces routine maintenance window</div></div>
-        <div class="card news-mockup-item"><span class="sentiment-badge sentiment-bear">Bearish</span><div style="font-size:0.85rem;font-weight:600">Regulator opens inquiry into stablecoin reserves</div></div>
+      <div class="feature-video-card" data-reveal data-reveal-delay="2">
+        <video autoplay muted loop playsinline preload="metadata" loading="lazy">
+          <source src="assets/vid-news.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </div>
@@ -345,16 +341,10 @@ body { background: var(--bg-void); overflow-x: hidden; }
           <span class="sentiment-badge sentiment-neutral" style="font-size:0.72rem;padding:0.35rem 0.8rem">+12 more</span>
         </div>
       </div>
-      <div class="card demo-panel" data-reveal data-reveal-delay="2" style="padding:1.5rem">
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid var(--glass-border)">
-          <div style="width:40px;height:40px;border-radius:10px;background:rgba(247,147,26,0.15);display:grid;place-items:center;color:#F7931A;font-weight:700;font-size:0.85rem">BN</div>
-          <div><div style="font-weight:600;font-size:0.9rem">Binance</div><div style="font-size:0.72rem;color:var(--fg-muted)">Connected · Read-only</div></div>
-          <div style="margin-left:auto;display:flex;align-items:center;gap:0.4rem"><span class="pulse-dot"></span><span style="font-family:var(--font-mono);font-size:0.68rem;color:var(--accent-green)">Synced</span></div>
-        </div>
-        <div style="display:flex;gap:0.75rem">
-          <div class="demo-stat" style="flex:1"><div class="fc-label">Portfolio</div><div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700">$24,891</div></div>
-          <div class="demo-stat" style="flex:1"><div class="fc-label">Positions</div><div style="font-family:var(--font-mono);font-size:1.1rem;font-weight:700">8</div></div>
-        </div>
+      <div class="feature-video-card" data-reveal data-reveal-delay="2">
+        <video id="vid-exchange" muted loop playsinline preload="metadata" loading="lazy">
+          <source src="assets/vid-exchange.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   </div>
@@ -375,8 +365,8 @@ body { background: var(--bg-void); overflow-x: hidden; }
         </div>
       </div>
       <div class="feature-video-card" data-reveal data-reveal-delay="2">
-        <video autoplay muted loop playsinline preload="metadata">
-          <source src="assets/hero-video-2.mp4" type="video/mp4">
+        <video autoplay muted loop playsinline preload="metadata" loading="lazy">
+          <source src="assets/vid-bot.mp4" type="video/mp4">
         </video>
       </div>
     </div>
@@ -523,36 +513,6 @@ window.addEventListener('DOMContentLoaded', () => {
       .to('#hero-cta', { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3');
   }
 
-  // Count-up triggers when scrolled into view
-  const dt = document.getElementById('demo-total');
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        if (entry.target === dt) Premium.countUp(dt, 28432, { prefix: '$', duration: 1400 });
-        obs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.4 });
-  if (dt) obs.observe(dt);
-
-  // Demo bars animate in
-  const bars = document.getElementById('demo-bars');
-  if (bars) {
-    const heights = [40, 55, 35, 70, 50, 85, 60, 95, 75, 100, 80, 90];
-    bars.innerHTML = heights.map(h => `<div class="demo-bar" style="height:0" data-h="${h}"></div>`).join('');
-    const barObs = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.querySelectorAll('.demo-bar').forEach((b, i) => {
-            setTimeout(() => { b.style.height = b.dataset.h + '%'; }, i * 50);
-          });
-          barObs.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.3 });
-    barObs.observe(bars);
-  }
-
   // FAQ accordion
   document.querySelectorAll('.faq-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -563,6 +523,18 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   // 3D scene removed per user request
+
+  // Exchange video: unmute when visible, mute when hidden
+  var exchangeVid = document.getElementById('vid-exchange');
+  if (exchangeVid) {
+    var vidObs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { exchangeVid.muted = false; exchangeVid.play(); }
+        else { exchangeVid.muted = true; }
+      });
+    }, { threshold: 0.4 });
+    vidObs.observe(exchangeVid);
+  }
 });
 </script>
 
